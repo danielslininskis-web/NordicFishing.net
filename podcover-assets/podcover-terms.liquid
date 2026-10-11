@@ -4,7 +4,7 @@
   assign shipping_url = pages['shipping'].url | default: '/pages/shipping'
   assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
   assign business_name = section.settings.business_name | default: shop.name
-  assign legal_email = section.settings.legal_email | default: shop.email
+  assign legal_email = section.settings.legal_email | default: 'podcoverhelp@gmail.com'
 %}
 
 <section class="pt-terms">
@@ -58,7 +58,6 @@
         <div class="pt-business-card">
           <div><small>BUSINESS</small><strong>{{ business_name | escape }}</strong></div>
           {% if section.settings.cvr != blank %}<div><small>CVR</small><strong>{{ section.settings.cvr | escape }}</strong></div>{% endif %}
-          {% if section.settings.business_address != blank %}<div><small>ADDRESS</small><strong>{{ section.settings.business_address | escape | newline_to_br }}</strong></div>{% endif %}
           {% if legal_email != blank %}<div><small>EMAIL</small><strong>{{ legal_email | escape }}</strong></div>{% endif %}
         </div>
         <p>You can also reach us through our <a href="{{ contact_url }}">contact page</a>.</p>
@@ -214,8 +213,7 @@
     { "type": "text", "id": "effective_date", "label": "Last updated date", "default": "11 October 2026" },
     { "type": "text", "id": "business_name", "label": "Legal business name" },
     { "type": "text", "id": "cvr", "label": "CVR number" },
-    { "type": "textarea", "id": "business_address", "label": "Business address" },
-    { "type": "text", "id": "legal_email", "label": "Contact email" }
+    { "type": "text", "id": "legal_email", "label": "Contact email", "default": "podcoverhelp@gmail.com" }
   ]
 }
 {% endschema %}
