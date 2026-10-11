@@ -1,0 +1,221 @@
+{% liquid
+  assign contact_url = pages['contact'].url | default: '/pages/contact'
+  assign refund_url = pages['refund-policy'].url | default: '/pages/refund-policy'
+  assign shipping_url = pages['shipping'].url | default: '/pages/shipping'
+  assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
+  assign business_name = section.settings.business_name | default: shop.name
+  assign legal_email = section.settings.legal_email | default: shop.email
+%}
+
+<section class="pt-terms">
+  <header class="pt-hero">
+    <div class="pt-hero-inner">
+      <div>
+        <span class="pt-kicker">PODCOVER / TERMS OF SERVICE</span>
+        <h1>The terms.<br><em>Made simple.</em></h1>
+      </div>
+      <div class="pt-hero-copy">
+        <p>What you agree to when you browse, order, and shop with PodCover.</p>
+        <span>Last updated {{ section.settings.effective_date }}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="pt-summary" aria-label="Terms summary">
+    <div><span>01</span><strong>Check your model</strong><p>AirPods case sizes are not interchangeable.</p></div>
+    <div><span>02</span><strong>Clear checkout</strong><p>Your total is shown before you place the order.</p></div>
+    <div><span>03</span><strong>Consumer rights</strong><p>Your mandatory legal rights still apply.</p></div>
+  </div>
+
+  <div class="pt-layout">
+    <aside class="pt-nav" aria-label="On this page">
+      <span class="pt-kicker">ON THIS PAGE</span>
+      <a href="#pt-scope">01 / Scope</a>
+      <a href="#pt-business">02 / Business details</a>
+      <a href="#pt-products">03 / Products and fit</a>
+      <a href="#pt-prices">04 / Prices and payment</a>
+      <a href="#pt-orders">05 / Orders</a>
+      <a href="#pt-delivery">06 / Delivery</a>
+      <a href="#pt-returns">07 / Returns</a>
+      <a href="#pt-faults">08 / Faulty goods</a>
+      <a href="#pt-liability">09 / Liability</a>
+      <a href="#pt-content">10 / Site content</a>
+      <a href="#pt-law">11 / Law and complaints</a>
+    </aside>
+
+    <div class="pt-copy">
+      <section id="pt-scope" aria-labelledby="pt-scope-title">
+        <span>01</span>
+        <h2 id="pt-scope-title">About these terms</h2>
+        <p>These terms apply when you browse this website or purchase products from {{ business_name | escape }}. By placing an order, you confirm that you have read and accepted the terms that apply at that time.</p>
+        <p>You must be legally able to enter into the purchase. If you are under 18, a parent or guardian must place the order or approve it.</p>
+        <p>Nothing in these terms removes or limits mandatory rights available to you under applicable consumer law.</p>
+      </section>
+
+      <section id="pt-business" aria-labelledby="pt-business-title">
+        <span>02</span>
+        <h2 id="pt-business-title">Who you are buying from</h2>
+        <div class="pt-business-card">
+          <div><small>BUSINESS</small><strong>{{ business_name | escape }}</strong></div>
+          {% if section.settings.cvr != blank %}<div><small>CVR</small><strong>{{ section.settings.cvr | escape }}</strong></div>{% endif %}
+          {% if section.settings.business_address != blank %}<div><small>ADDRESS</small><strong>{{ section.settings.business_address | escape | newline_to_br }}</strong></div>{% endif %}
+          {% if legal_email != blank %}<div><small>EMAIL</small><strong>{{ legal_email | escape }}</strong></div>{% endif %}
+        </div>
+        <p>You can also reach us through our <a href="{{ contact_url }}">contact page</a>.</p>
+      </section>
+
+      <section id="pt-products" aria-labelledby="pt-products-title">
+        <span>03</span>
+        <h2 id="pt-products-title">Products and compatibility</h2>
+        <p>We aim to describe and photograph every product accurately. Colours can look slightly different depending on your screen, lighting, and device settings.</p>
+        <p>AirPods models use different case dimensions. You are responsible for selecting the model shown on your AirPods or charging case before ordering. The selected model and colour appear in your cart and order confirmation.</p>
+        <p>Apple and AirPods are trademarks of Apple Inc. PodCover is an independent accessories brand and is not affiliated with or endorsed by Apple Inc.</p>
+      </section>
+
+      <section id="pt-prices" aria-labelledby="pt-prices-title">
+        <span>04</span>
+        <h2 id="pt-prices-title">Prices and payment</h2>
+        <p>Prices are displayed in the currency shown by the store. Applicable taxes are included or calculated as required by law. Any delivery charge is shown before you complete checkout.</p>
+        <p>Available payment methods appear at checkout. By submitting payment details, you confirm that you are authorised to use the chosen method.</p>
+        <p>If a clear pricing or technical error affects an order, we may contact you before accepting it. You can choose whether to continue at the correct price or cancel for a full refund.</p>
+      </section>
+
+      <section id="pt-orders" aria-labelledby="pt-orders-title">
+        <span>05</span>
+        <h2 id="pt-orders-title">Orders and availability</h2>
+        <p>After you place an order, we send an electronic confirmation to the address supplied at checkout. We may reject or cancel an order if payment is not authorised, the product is unavailable, the order information appears incorrect, or we reasonably suspect fraud or misuse.</p>
+        <p>If we cancel after receiving payment, we refund the affected amount to the original payment method.</p>
+        <p>Products are subject to availability. Adding something to your cart does not reserve stock.</p>
+      </section>
+
+      <section id="pt-delivery" aria-labelledby="pt-delivery-title">
+        <span>06</span>
+        <h2 id="pt-delivery-title">Delivery</h2>
+        <p>Available destinations, delivery methods, expected timeframes, and costs are shown at checkout or on our <a href="{{ shipping_url }}">shipping page</a>.</p>
+        <p>Please provide a complete and accurate delivery address. Contact us promptly if you notice an error. We cannot guarantee that an address can be changed after fulfilment begins.</p>
+        <p>Delivery estimates are estimates unless we expressly agree to a fixed deadline. Your statutory rights for delayed or missing delivery remain unaffected.</p>
+      </section>
+
+      <section id="pt-returns" aria-labelledby="pt-returns-title">
+        <span>07</span>
+        <h2 id="pt-returns-title">Cancellations and returns</h2>
+        <p>Customers in Denmark and the EU generally have 14 days after receiving an online order to tell us they wish to cancel, followed by 14 days to return it. Exceptions can apply, including products made to individual specifications or clearly personalised.</p>
+        <p>You pay change-of-mind return postage unless applicable law requires otherwise. Full instructions, refund timing, and item-condition rules are explained in our <a href="{{ refund_url }}">refund policy</a>.</p>
+      </section>
+
+      <section id="pt-faults" aria-labelledby="pt-faults-title">
+        <span>08</span>
+        <h2 id="pt-faults-title">Faulty or incorrect goods</h2>
+        <p>Inspect your order when it arrives and contact us if an item is faulty, damaged, or different from what you ordered. Include your order number and photographs where useful.</p>
+        <p>Customers in Denmark generally have a two-year statutory right to complain about a lack of conformity. Different mandatory periods may apply elsewhere. Contacting us within a reasonable time helps us resolve the issue, and these terms do not reduce your legal remedies.</p>
+      </section>
+
+      <section id="pt-liability" aria-labelledby="pt-liability-title">
+        <span>09</span>
+        <h2 id="pt-liability-title">Our responsibility</h2>
+        <p>We are responsible for losses that are a foreseeable result of our breach of these terms or failure to use reasonable care. We are not responsible for losses caused by circumstances outside our reasonable control or for business losses arising from a consumer purchase.</p>
+        <p>Nothing in these terms excludes responsibility that cannot legally be excluded, including liability for fraud, deliberate misconduct, or personal injury caused by negligence.</p>
+      </section>
+
+      <section id="pt-content" aria-labelledby="pt-content-title">
+        <span>10</span>
+        <h2 id="pt-content-title">Website content and privacy</h2>
+        <p>The PodCover name, visual identity, website design, photographs, graphics, and original text are owned by us or used with permission. They may not be copied, republished, or commercially exploited without permission.</p>
+        <p>We process personal information as described in our <a href="{{ privacy_url }}">privacy policy</a>. Shopify and payment providers may also process information needed to operate the store and complete your purchase.</p>
+        <p>We may update, suspend, or correct website content when reasonably necessary. We do not promise that the website will always be uninterrupted or free from technical errors.</p>
+      </section>
+
+      <section id="pt-law" aria-labelledby="pt-law-title">
+        <span>11</span>
+        <h2 id="pt-law-title">Changes, law, and complaints</h2>
+        <p>The terms shown when you place your order apply to that purchase. We may update these terms for future visits and orders when our services, business, or legal obligations change.</p>
+        <p>These terms are governed by Danish law, while you keep any mandatory consumer protections available in the country where you live. Any dispute may be brought before the courts or consumer complaint bodies that have jurisdiction under applicable law.</p>
+        <p>Please <a href="{{ contact_url }}">contact us</a> first if you have a complaint. We will try to resolve it directly. Eligible consumers may also contact the relevant Danish consumer complaints body or their local European Consumer Centre.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="pt-contact">
+    <div>
+      <span class="pt-kicker">STILL UNSURE?</span>
+      <h2>Ask before you order.</h2>
+      <p>Tell us your AirPods model or send us your question.</p>
+    </div>
+    <a href="{{ contact_url }}">Contact PodCover <span aria-hidden="true">↗</span></a>
+  </div>
+</section>
+
+<style>
+.pt-terms{--pt-ink:#182c3a;--pt-muted:#586976;--pt-line:#dce3e7;background:#fff;color:var(--pt-ink)}
+.pt-terms *,.pt-terms *::before,.pt-terms *::after{box-sizing:border-box}
+.pt-terms a{color:inherit;text-decoration:none}
+.pt-terms h1,.pt-terms h2{margin:0;font-family:Manrope,Arial,sans-serif;font-weight:500;letter-spacing:-.055em;line-height:1.04}
+.pt-terms p{color:var(--pt-muted);font-size:15px;line-height:1.85}
+.pt-terms .pt-kicker{display:block;font-size:10px;font-weight:700;letter-spacing:.18em;line-height:1.6}
+.pt-hero{background:#f5f3ef;border-bottom:1px solid var(--pt-line)}
+.pt-hero-inner{display:grid;grid-template-columns:1.15fr .85fr;align-items:end;gap:10%;max-width:1440px;margin:auto;padding:95px 6% 90px}
+.pt-hero .pt-kicker{margin-bottom:30px}
+.pt-hero h1{font-size:clamp(56px,7.2vw,108px);color:#13191f}
+.pt-hero h1 em{font-family:Georgia,'Times New Roman',serif;font-weight:400;color:#397599}
+.pt-hero-copy{padding-bottom:10px}
+.pt-hero-copy p{max-width:440px;margin:0 0 24px;font-size:17px}
+.pt-hero-copy>span{font-size:10px;letter-spacing:.12em;color:var(--pt-muted)}
+.pt-summary{display:grid;grid-template-columns:repeat(3,1fr);max-width:1440px;margin:auto;padding:0 6%;border-bottom:1px solid var(--pt-line)}
+.pt-summary>div{padding:34px 6%;border-left:1px solid var(--pt-line)}
+.pt-summary>div:last-child{border-right:1px solid var(--pt-line)}
+.pt-summary span{display:block;margin-bottom:24px;font-size:9px;letter-spacing:.15em;color:var(--pt-muted)}
+.pt-summary strong{display:block;font-family:Manrope,Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:500;letter-spacing:-.035em}
+.pt-summary p{margin:8px 0 0;font-size:12px;line-height:1.6}
+.pt-layout{display:grid;grid-template-columns:minmax(210px,.55fr) minmax(0,1.45fr);gap:10%;max-width:1180px;margin:auto;padding:100px 6% 110px}
+.pt-nav{position:sticky;top:120px;align-self:start;display:flex;flex-direction:column}
+.pt-nav .pt-kicker{margin-bottom:24px}
+.pt-nav a{padding:11px 0;border-bottom:1px solid var(--pt-line);font-size:11px;color:var(--pt-muted);transition:color .2s,padding-left .2s}
+.pt-nav a:hover{padding-left:5px;color:var(--pt-ink)}
+.pt-copy>section{position:relative;scroll-margin-top:120px;padding-left:70px}
+.pt-copy>section+section{margin-top:58px;padding-top:48px;border-top:1px solid var(--pt-line)}
+.pt-copy>section>span{position:absolute;top:8px;left:0;font-size:10px;letter-spacing:.12em;color:#397599}
+.pt-copy h2{font-size:clamp(27px,3vw,40px)}
+.pt-copy p{max-width:680px;margin:20px 0 0}
+.pt-copy p a{text-decoration:underline;text-underline-offset:4px;color:var(--pt-ink)}
+.pt-business-card{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:26px;background:var(--pt-line);border:1px solid var(--pt-line)}
+.pt-business-card>div{display:flex;flex-direction:column;gap:9px;padding:22px;background:#f7f9fa}
+.pt-business-card small{font-size:8px;letter-spacing:.15em;color:var(--pt-muted)}
+.pt-business-card strong{font-size:13px;font-weight:500;line-height:1.6}
+.pt-contact{display:flex;align-items:center;justify-content:space-between;gap:50px;max-width:1270px;margin:0 auto 100px;padding:50px 5%;background:#edf2f4}
+.pt-contact .pt-kicker{margin-bottom:18px}
+.pt-contact h2{font-size:clamp(34px,4.5vw,60px)}
+.pt-contact p{margin:16px 0 0}
+.pt-contact>a{display:inline-flex;align-items:center;justify-content:space-between;gap:45px;min-width:220px;padding:18px 22px;background:#161b20;color:#fff;font-size:13px;font-weight:700;transition:transform .2s,background .2s}
+.pt-contact>a:hover{transform:translateY(-2px);background:#30526a}
+.pt-terms a:focus-visible{outline:2px solid #397599;outline-offset:5px}
+@media(max-width:760px){
+ .pt-hero-inner{grid-template-columns:1fr;gap:42px;padding:65px 6%}
+ .pt-hero h1{font-size:clamp(50px,14vw,76px)}
+ .pt-hero-copy p{font-size:15px}
+ .pt-summary{grid-template-columns:1fr;padding:0 6%}
+ .pt-summary>div{padding:25px 0;border-left:0;border-bottom:1px solid var(--pt-line)}
+ .pt-summary>div:last-child{border-right:0;border-bottom:0}
+ .pt-summary span{margin-bottom:12px}
+ .pt-layout{grid-template-columns:1fr;padding:70px 6% 80px}
+ .pt-nav{display:none}
+ .pt-copy>section{padding-left:38px}
+ .pt-copy>section+section{margin-top:42px;padding-top:38px}
+ .pt-business-card{grid-template-columns:1fr}
+ .pt-contact{align-items:flex-start;flex-direction:column;margin:0 6% 70px;padding:35px 8%}
+ .pt-contact>a{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.pt-nav a,.pt-contact>a{transition:none}}
+</style>
+
+{% schema %}
+{
+  "name": "PodCover terms",
+  "settings": [
+    { "type": "text", "id": "effective_date", "label": "Last updated date", "default": "11 October 2026" },
+    { "type": "text", "id": "business_name", "label": "Legal business name" },
+    { "type": "text", "id": "cvr", "label": "CVR number" },
+    { "type": "textarea", "id": "business_address", "label": "Business address" },
+    { "type": "text", "id": "legal_email", "label": "Contact email" }
+  ]
+}
+{% endschema %}
