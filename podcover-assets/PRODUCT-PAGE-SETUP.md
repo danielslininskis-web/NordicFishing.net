@@ -12,9 +12,11 @@ This replaces the existing product section with a rounded product stage, three b
 
 Existing product photos appear automatically. To show a photo for a particular colour, assign that photo to the corresponding variant in Shopify Admin → Products.
 
-Optional settings appear under the product section in the theme editor: photo background colour, subtitle override, free-shipping labels and genuine review ratings. Free-shipping labels assume a free standard shipping rate is configured in Shopify.
+Optional settings appear under the product section in the theme editor: photo background colour, subtitle override, free-shipping labels, genuine review ratings and a Trustpilot bar. Free-shipping labels assume a free standard shipping rate is configured in Shopify.
 
-Ratings use Shopify's `reviews.rating` and `reviews.rating_count` metafields and remain hidden without real review data. Discounts appear only when a variant has a higher compare-at price. The reference brand's reviews, bestseller claims and guarantee are not included.
+To display Trustpilot, open the product section settings and add the genuine PodCover Trustpilot profile link. You may also add the current TrustScore and published review count. Keep those two values matched to the live Trustpilot profile. The bar stays hidden until a profile link is provided.
+
+Ratings use Shopify's `reviews.rating` and `reviews.rating_count` metafields and remain hidden without real review data. Discounts appear only when a variant has a higher compare-at price. The reference brand's reviews, bestseller claims and guarantee are not included. Colour labels such as `Matcha Green(only for 2 pro)` and `Lavender(only for 2 pro)` are displayed simply as `Matcha Green` and `Lavender`; their underlying variant values and availability remain intact.
 
 ## Validation
 

@@ -80,7 +80,7 @@
         </div>
 
         {% form 'product', product, id: form_id, class: 'pc-product-form' %}
-          <div class="pc-native-option"><label for="pc-variant-{{ section.id }}">{% if product.has_only_default_variant %}Product{% else %}Choose your model and colour{% endif %}</label><select name="id" id="pc-variant-{{ section.id }}" data-pc-variant required>{% for variant in product.variants %}<option value="{{ variant.id }}"{% if variant.id == selected_variant.id %} selected{% endif %}>{{ variant.title | escape }} — {{ variant.price | money }}{% unless variant.available %} — Sold out{% endunless %}</option>{% endfor %}</select></div>
+          <div class="pc-native-option"><label for="pc-variant-{{ section.id }}">{% if product.has_only_default_variant %}Product{% else %}Choose your model and colour{% endif %}</label><select name="id" id="pc-variant-{{ section.id }}" data-pc-variant required>{% for variant in product.variants %}<option value="{{ variant.id }}"{% if variant.id == selected_variant.id %} selected{% endif %}>{% for variant_option in variant.options %}{{ variant_option | replace: '(only for 2 pro)', '' | replace: '(only for the 2 pro)', '' | strip | escape }}{% unless forloop.last %} / {% endunless %}{% endfor %} — {{ variant.price | money }}{% unless variant.available %} — Sold out{% endunless %}</option>{% endfor %}</select></div>
           {% unless product.has_only_default_variant %}
             <div class="pc-enhanced-options" hidden>
               {% for option in product.options_with_values %}
@@ -93,12 +93,13 @@
                   endif
                 %}
                 <div class="pc-option-group" data-pc-option-index="{{ option_index }}">
-                  <div class="pc-option-heading"><span>{{ option.name | escape }}</span><span data-pc-option-value>{{ selected_variant.options[option_index] | escape }}</span></div>
+                  <div class="pc-option-heading"><span>{{ option.name | escape }}</span><span data-pc-option-value>{{ selected_variant.options[option_index] | replace: '(only for 2 pro)', '' | replace: '(only for the 2 pro)', '' | strip | escape }}</span></div>
                   <div class="pc-option-values{% if is_colour_option %} pc-colour-values{% endif %}" role="group" aria-label="{{ option.name | escape }}">
                     {% for value in option.values %}
                       {% liquid
                         assign value_name = value.name | default: value
-                        assign value_lower = value_name | downcase
+                        assign value_label = value_name | replace: '(only for 2 pro)', '' | replace: '(only for the 2 pro)', '' | strip
+                        assign value_lower = value_label | downcase
                         assign swatch_colour = ''
                         case value_lower
                           when 'matcha green', 'matcha', 'green'
@@ -113,7 +114,7 @@
                             assign swatch_colour = '#7bbfe8'
                         endcase
                       %}
-                      <button type="button" class="pc-option{% if selected_variant.options[option_index] == value_name %} is-active{% endif %}" data-pc-option="{{ value_name | escape }}" aria-pressed="{% if selected_variant.options[option_index] == value_name %}true{% else %}false{% endif %}">{% if is_colour_option and swatch_colour != blank %}<span class="pc-swatch" style="background: {{ swatch_colour }};" aria-hidden="true"></span>{% endif %}<span>{{ value_name | escape }}</span></button>
+                      <button type="button" class="pc-option{% if selected_variant.options[option_index] == value_name %} is-active{% endif %}" data-pc-option="{{ value_name | escape }}" aria-pressed="{% if selected_variant.options[option_index] == value_name %}true{% else %}false{% endif %}">{% if is_colour_option and swatch_colour != blank %}<span class="pc-swatch" style="background: {{ swatch_colour }};" aria-hidden="true"></span>{% endif %}<span>{{ value_label | escape }}</span></button>
                     {% endfor %}
                   </div>
                 </div>
@@ -126,6 +127,13 @@
           <div class="pc-form-result" hidden><p class="pc-form-message" data-pc-message role="status" aria-live="polite"></p><a href="{{ routes.cart_url }}" data-pc-view-cart hidden>View your bag ↗</a></div>
         {% endform %}
         <div class="pc-assurance"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg><span>{% if section.settings.show_free_shipping %}Free standard shipping{% else %}Secure Shopify checkout{% endif %}</span><span aria-hidden="true">·</span><a href="{{ refund_url }}">Returns &amp; refunds</a></div>
+        {% if section.settings.show_trustpilot and section.settings.trustpilot_url != blank %}
+          <a class="pc-trustpilot" href="{{ section.settings.trustpilot_url }}" target="_blank" rel="noopener noreferrer" aria-label="View PodCover on Trustpilot">
+            <span class="pc-trustpilot-brand"><span aria-hidden="true">★</span><strong>Trustpilot</strong></span>
+            <span class="pc-trustpilot-copy">{% if section.settings.trustpilot_score != blank and section.settings.trustpilot_review_count != blank %}TrustScore {{ section.settings.trustpilot_score | escape }} <span aria-hidden="true">·</span> {{ section.settings.trustpilot_review_count | escape }} reviews{% else %}View our Trustpilot profile{% endif %}</span>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg>
+          </a>
+        {% endif %}
         <div class="pc-accordions">
           <details><summary>The details<span aria-hidden="true">+</span></summary><div class="pc-detail-copy">{% if product.description != blank %}{{ product.description }}{% elsif is_blue_cloud %}<p>A cloud-inspired blue finish with a glossy look and a silver ball-chain accent. A little colour for your everyday.</p>{% elsif is_colour_edit %}<p>Meet your everyday colour edit: Matcha Green, Black, White and Lavender. Available colours depend on your selected AirPods model.</p>{% else %}<p>A case for your everyday essential. Choose your available model and colour above.</p>{% endif %}</div></details>
           <details><summary>Finding your fit<span aria-hidden="true">+</span></summary><div class="pc-detail-copy"><p>Check your AirPods model in your device settings before choosing a case. Different AirPods models have different case dimensions.</p><p>Only the combinations offered above are available. This product is an accessory case; AirPods and the charging case are not included.</p></div></details>
@@ -207,11 +215,12 @@
   .pc-add{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:59px;padding:17px 20px;background:var(--pc-ink);border:1px solid var(--pc-ink);border-radius:13px;color:#fff;font-size:13px;font-weight:750;box-shadow:0 7px 18px #20232112;transition:background .2s,transform .2s}.pc-add>svg{width:20px;height:20px;transition:transform .2s}.pc-add:hover:not(:disabled){background:#394136;transform:translateY(-1px)}.pc-add:hover:not(:disabled)>svg{transform:translateX(3px)}.pc-add:disabled{background:#8b8e85;border-color:#8b8e85;box-shadow:none}.pc-add-prices{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end;line-height:1.5}.pc-add-prices s{font-size:11px;color:#ffffffa6;font-weight:500}
   .pc-form-result{padding:13px 14px;margin-top:12px;border:1px solid var(--pc-line);background:#f5f7f1;border-radius:9px;font-size:12px;line-height:1.6;overflow-wrap:anywhere}.pc-form-result.is-error{background:#fff6f2;border-color:#e9c6b7;color:#974826}.pc-form-result a{display:inline-block;margin-top:6px;text-decoration:underline;text-underline-offset:3px;font-weight:700}
   .pc-assurance{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:7px;padding:17px 0 22px;font-size:10px;color:#6b7265;line-height:1.5}.pc-assurance svg{width:17px;height:17px}.pc-assurance a{text-decoration:underline;text-underline-offset:3px}
+  .pc-trustpilot{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 20px;padding:12px 14px;border:1px solid var(--pc-line);border-radius:12px;background:#fff;box-shadow:0 7px 22px #2023210c;font-size:11px;line-height:1.45;transition:transform .2s,border-color .2s}.pc-trustpilot:hover{transform:translateY(-1px);border-color:#bcc4b7}.pc-trustpilot-brand{display:flex;align-items:center;gap:5px;white-space:nowrap}.pc-trustpilot-brand>span{display:grid;place-items:center;width:21px;height:21px;border-radius:5px;background:#00b67a;color:#fff;font-size:14px}.pc-trustpilot-brand strong{font-size:12px}.pc-trustpilot-copy{margin-left:auto;color:var(--pc-muted);text-align:right}.pc-trustpilot>svg{width:16px;height:16px}
   .pc-accordions{border-top:1px solid var(--pc-line)}.pc-accordions details{border-bottom:1px solid var(--pc-line)}.pc-accordions summary{display:flex;justify-content:space-between;align-items:center;gap:15px;list-style:none;cursor:pointer;padding:17px 0;font-size:12px;font-weight:700;line-height:1.5}.pc-accordions summary::-webkit-details-marker{display:none}.pc-accordions summary>span{font-size:20px;font-weight:400}.pc-accordions details[open] summary>span{transform:rotate(45deg)}
   .pc-detail-copy{font-size:12px;line-height:1.8;color:var(--pc-muted);padding-bottom:18px;overflow-wrap:anywhere}.pc-detail-copy p+p{margin-top:10px}.pc-detail-copy a{text-decoration:underline;text-underline-offset:3px}.pc-detail-copy img{max-width:100%;height:auto}.pc-detail-copy ul,.pc-detail-copy ol{padding-left:20px}.pc-detail-copy table{display:block;max-width:100%;overflow:auto}.pc-detail-copy h2,.pc-detail-copy h3{font-size:16px;letter-spacing:-.025em;line-height:1.5;margin:12px 0;color:var(--pc-ink)}.pc-help{padding-top:16px;font-size:11px;color:var(--pc-muted);line-height:1.7}.pc-help a{display:inline-flex;align-items:center;gap:5px;color:var(--pc-ink);font-weight:650}.pc-help svg{width:13px;height:13px}
   .pc-everyday{margin-top:80px;padding:35px;background:#f4f3ee;border-radius:22px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr);gap:25px 35px;align-items:start}.pc-everyday h2{font-size:clamp(26px,3vw,38px);font-weight:600;line-height:1.12;letter-spacing:-.055em;padding-top:12px}.pc-everyday h2 em{font-family:Georgia,serif;font-weight:400;color:var(--pc-green)}.pc-everyday-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;padding-top:5px}.pc-everyday-steps>div>span{font-size:10px;color:#8c9584;display:block;margin-bottom:17px}.pc-everyday-steps strong{display:block;font-size:13px;font-weight:650;line-height:1.5;margin-bottom:7px}.pc-everyday-steps p{font-size:11px;line-height:1.7;color:var(--pc-muted)}.pc-collection-link{font-size:11px;font-weight:650;display:inline-flex;justify-content:space-between;gap:28px;align-items:center;justify-self:start;border-bottom:1px solid #6b7265;padding-bottom:7px;line-height:1.5}.pc-collection-link>svg{width:17px;height:17px}
   @media(max-width:999px){.pc-layout{grid-template-columns:1fr;gap:24px;max-width:660px;margin:auto}.pc-gallery{position:static}.pc-gallery-top{grid-template-columns:minmax(0,1fr) 120px}.pc-purchase{padding:0}.pc-purchase h1{font-size:36px}.pc-everyday{grid-template-columns:1fr}.pc-everyday-steps{max-width:620px}}
-  @media(max-width:760px){.pc-wrap{padding:0 5% 40px}.pc-breadcrumb{font-size:10px;padding:15px 0 17px;gap:6px}.pc-breadcrumb>span:last-child{display:none}.pc-breadcrumb>span:nth-last-child(2){display:none}.pc-layout{gap:19px}.pc-gallery-top{grid-template-columns:minmax(0,1fr) 86px;gap:8px}.pc-photo{border-radius:16px;min-height:245px;aspect-ratio:1}.pc-photo-label{font-size:8px;left:10px;top:10px;padding:6px 8px}.pc-photo-index{font-size:9px;right:10px;bottom:10px}.pc-benefit-rail{gap:7px}.pc-rail-card{padding:9px 4px;gap:7px;border-radius:12px}.pc-rail-card svg{width:28px;height:28px}.pc-rail-card span{font-size:9px;line-height:1.35}.pc-thumbnails{gap:7px;padding-top:10px}.pc-thumbnail{flex-basis:54px;width:54px;height:54px;border-radius:9px}.pc-gallery-note{display:none}.pc-intro-line{margin-bottom:10px;gap:8px}.pc-eyebrow{font-size:8px}.pc-shipping-tag{font-size:9px;padding:5px 7px}.pc-shipping-tag svg{width:14px;height:14px}.pc-purchase h1{font-size:29px;line-height:1.08;margin-bottom:10px}.pc-subtitle{font-size:12px;line-height:1.65}.pc-price-row{margin:15px 0}.pc-price-row>strong{font-size:23px}.pc-feature-grid{margin-bottom:17px;padding-bottom:17px;gap:10px}.pc-feature-grid>div{font-size:10px;gap:6px}.pc-feature-icon{width:27px;height:27px}.pc-feature-icon svg{width:16px;height:16px}.pc-option{font-size:10px;padding:10px;min-height:42px}.pc-colour-values .pc-option{flex-basis:calc(50% - 8px)}.pc-option-group+.pc-option-group{margin-top:15px}.pc-quantity-line{margin-top:17px;gap:10px}.pc-fit-note{font-size:10px}.pc-add{min-height:56px;padding:15px 16px;font-size:12px;border-radius:12px}.pc-assurance{font-size:9px;padding:15px 0 20px}.pc-everyday{margin-top:40px;padding:25px 21px;border-radius:16px;gap:25px}.pc-everyday h2{font-size:31px}.pc-everyday-steps{grid-template-columns:1fr;gap:17px}.pc-everyday-steps>div{position:relative;padding-left:30px}.pc-everyday-steps>div>span{position:absolute;left:0;top:3px;margin:0}.pc-everyday-steps strong{margin-bottom:4px}}
+  @media(max-width:760px){.pc-wrap{padding:0 5% 40px}.pc-breadcrumb{font-size:10px;padding:15px 0 17px;gap:6px}.pc-breadcrumb>span:last-child{display:none}.pc-breadcrumb>span:nth-last-child(2){display:none}.pc-layout{gap:19px}.pc-gallery-top{grid-template-columns:minmax(0,1fr) 86px;gap:8px}.pc-photo{border-radius:16px;min-height:245px;aspect-ratio:1}.pc-photo-label{font-size:8px;left:10px;top:10px;padding:6px 8px}.pc-photo-index{font-size:9px;right:10px;bottom:10px}.pc-benefit-rail{gap:7px}.pc-rail-card{padding:9px 4px;gap:7px;border-radius:12px}.pc-rail-card svg{width:28px;height:28px}.pc-rail-card span{font-size:9px;line-height:1.35}.pc-thumbnails{gap:7px;padding-top:10px}.pc-thumbnail{flex-basis:54px;width:54px;height:54px;border-radius:9px}.pc-gallery-note{display:none}.pc-intro-line{margin-bottom:10px;gap:8px}.pc-eyebrow{font-size:8px}.pc-shipping-tag{font-size:9px;padding:5px 7px}.pc-shipping-tag svg{width:14px;height:14px}.pc-purchase h1{font-size:29px;line-height:1.08;margin-bottom:10px}.pc-subtitle{font-size:12px;line-height:1.65}.pc-price-row{margin:15px 0}.pc-price-row>strong{font-size:23px}.pc-feature-grid{margin-bottom:17px;padding-bottom:17px;gap:10px}.pc-feature-grid>div{font-size:10px;gap:6px}.pc-feature-icon{width:27px;height:27px}.pc-feature-icon svg{width:16px;height:16px}.pc-option{font-size:10px;padding:10px;min-height:42px}.pc-colour-values .pc-option{flex-basis:calc(50% - 8px)}.pc-option-group+.pc-option-group{margin-top:15px}.pc-quantity-line{margin-top:17px;gap:10px}.pc-fit-note{font-size:10px}.pc-add{min-height:56px;padding:15px 16px;font-size:12px;border-radius:12px}.pc-assurance{font-size:9px;padding:15px 0 20px}.pc-trustpilot{padding:11px 12px;gap:8px;font-size:9px}.pc-trustpilot-brand strong{font-size:11px}.pc-trustpilot-brand>span{width:19px;height:19px;font-size:13px}.pc-trustpilot>svg{width:14px;height:14px}.pc-everyday{margin-top:40px;padding:25px 21px;border-radius:16px;gap:25px}.pc-everyday h2{font-size:31px}.pc-everyday-steps{grid-template-columns:1fr;gap:17px}.pc-everyday-steps>div{position:relative;padding-left:30px}.pc-everyday-steps>div>span{position:absolute;left:0;top:3px;margin:0}.pc-everyday-steps strong{margin-bottom:4px}}
   @media(max-width:359px){.pc-gallery-top{grid-template-columns:minmax(0,1fr) 73px;gap:6px}.pc-photo{min-height:222px}.pc-photo-label{max-width:calc(100% - 14px);font-size:7px;left:7px;top:8px;padding:5px}.pc-rail-card span{font-size:8px}.pc-rail-card svg{width:24px;height:24px}.pc-purchase h1{font-size:26px}.pc-add{gap:8px;padding:14px 12px}.pc-add-prices{gap:5px}.pc-add-prices s{font-size:9px}}
   @media(prefers-reduced-motion:reduce){.pc-product *{transition:none!important}.pc-add:hover:not(:disabled),.pc-add:hover:not(:disabled)>svg{transform:none}}
 </style>
@@ -278,7 +287,7 @@
           variantSelect.value = selected ? selected.id : '';
           groups.forEach(group => {
             const index = Number(group.dataset.pcOptionIndex);
-            group.querySelector('[data-pc-option-value]').textContent = optionValues[index] || '';
+            group.querySelector('[data-pc-option-value]').textContent = displayOption(optionValues[index]);
             group.querySelectorAll('[data-pc-option]').forEach(button => {
               const active = button.dataset.pcOption === optionValues[index];
               const possible = config.variants.some(v => v.available && v.options.every((value, i) => value === (i === index ? button.dataset.pcOption : optionValues[i])));
@@ -286,7 +295,7 @@
               button.classList.toggle('is-unavailable', !possible);
               button.setAttribute('aria-pressed', String(active));
               button.title = possible ? button.dataset.pcOption : button.dataset.pcOption + ' — unavailable for this combination';
-              button.setAttribute('aria-label', button.title);
+              button.setAttribute('aria-label', possible ? displayOption(button.dataset.pcOption) : displayOption(button.dataset.pcOption) + ' — unavailable for this combination');
             });
           });
           const available = Boolean(selected && selected.available && (selected.max === null || selected.max >= selected.min));
@@ -312,6 +321,7 @@
             try { const url = new URL(window.location.href); if (selected) url.searchParams.set('variant', selected.id); else url.searchParams.delete('variant'); window.history.replaceState(window.history.state, '', url); } catch (_) { /* Native form still works without history access. */ }
           }
         }
+        function displayOption(value) { return String(value || '').replace(/\s*\(only for(?: the)? 2 pro\)\s*/gi, '').trim(); }
         groups.forEach(group => group.addEventListener('click', event => { const button = event.target.closest('[data-pc-option]'); if (!button || busy) return; optionValues[Number(group.dataset.pcOptionIndex)] = button.dataset.pcOption; clearMessage(); sync(true); }));
         variantSelect.addEventListener('change', () => { const variant = config.variants.find(v => v.id === variantSelect.value); if (!variant) return; optionValues = [...variant.options]; clearMessage(); sync(true); });
         root.querySelectorAll('.pc-thumbnail').forEach(button => button.addEventListener('click', () => showImage(button.dataset.pcImageId)));
@@ -351,7 +361,12 @@
     { "type": "color", "id": "image_background", "label": "Product image background", "default": "#f3f0e8" },
     { "type": "text", "id": "subtitle", "label": "Subtitle override", "info": "Leave blank to use the product's default subtitle." },
     { "type": "checkbox", "id": "show_free_shipping", "label": "Show free standard shipping", "default": true },
-    { "type": "checkbox", "id": "show_reviews", "label": "Show genuine product ratings when available", "default": true, "info": "Uses Shopify review metafields. No rating appears without review data." }
+    { "type": "checkbox", "id": "show_reviews", "label": "Show genuine product ratings when available", "default": true, "info": "Uses Shopify review metafields. No rating appears without review data." },
+    { "type": "header", "content": "Trustpilot" },
+    { "type": "checkbox", "id": "show_trustpilot", "label": "Show Trustpilot bar", "default": true },
+    { "type": "url", "id": "trustpilot_url", "label": "Trustpilot profile link", "info": "The bar remains hidden until this is added." },
+    { "type": "text", "id": "trustpilot_score", "label": "Current TrustScore", "info": "Example: 4.5. Keep this matched to your live profile." },
+    { "type": "text", "id": "trustpilot_review_count", "label": "Current review count", "info": "Use your genuine published review count." }
   ]
 }
 {% endschema %}
