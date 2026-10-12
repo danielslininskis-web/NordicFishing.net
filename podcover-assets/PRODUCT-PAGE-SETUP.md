@@ -14,7 +14,7 @@ Existing product photos appear automatically. To show a photo for a particular c
 
 Optional settings appear under the product section in the theme editor: photo background colour, subtitle override, free-shipping labels, same-day dispatch countdown, genuine review ratings and a Trustpilot bar. Free-shipping labels assume a free standard shipping rate is configured in Shopify.
 
-The dispatch message uses Copenhagen time. By default, orders placed before 15:00 Monday–Friday see a live countdown and the message that the order will be dispatched today. After the cutoff and on weekends, it changes to next-working-day dispatch. Open the product section's **Same-day dispatch** settings to change the weekday cutoff or hide the message. Only enable the promise if orders can consistently be handed to the carrier by the selected cutoff.
+The dispatch message uses Copenhagen time. By default, orders placed before 15:00 Monday–Friday see a live countdown and the message that the order will be dispatched today. After the cutoff and on weekends, the timer continues counting down to the next working-day cutoff and the wording changes to next-working-day dispatch. Open the product section's **Same-day dispatch** settings to change the weekday cutoff or hide the message. Only enable the promise if orders can consistently be handed to the carrier by the selected cutoff.
 
 To display Trustpilot, open the product section settings and add the genuine PodCover Trustpilot profile link. You may also add the current TrustScore and published review count. Keep those two values matched to the live Trustpilot profile. The bar stays hidden until a profile link is provided.
 

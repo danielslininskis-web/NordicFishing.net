@@ -332,28 +332,47 @@
         const dispatch = root.querySelector('[data-pc-dispatch]');
         if (dispatch) {
           const cutoffHour = Number(dispatch.dataset.cutoffHour);
-          const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Copenhagen', weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+          const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Copenhagen', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+          const partsFor = date => Object.fromEntries(formatter.formatToParts(date).map(part => [part.type, part.value]));
+          const localTimeToUtc = (year, month, day, hour) => {
+            const wanted = Date.UTC(year, month - 1, day, hour, 0, 0);
+            let guess = wanted;
+            for (let pass = 0; pass < 3; pass += 1) {
+              const actual = partsFor(new Date(guess));
+              const actualAsUtc = Date.UTC(Number(actual.year), Number(actual.month) - 1, Number(actual.day), Number(actual.hour), Number(actual.minute), Number(actual.second));
+              guess += wanted - actualAsUtc;
+            }
+            return guess;
+          };
           const updateDispatch = () => {
             if (!Number.isFinite(cutoffHour)) return;
-            const parts = Object.fromEntries(formatter.formatToParts(new Date()).map(part => [part.type, part.value]));
+            const now = new Date();
+            const parts = partsFor(now);
             const isWorkingDay = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(parts.weekday);
             const secondsNow = Number(parts.hour) * 3600 + Number(parts.minute) * 60 + Number(parts.second);
-            const remaining = cutoffHour * 3600 - secondsNow;
+            const dispatchesToday = isWorkingDay && cutoffHour * 3600 > secondsNow;
+            let remaining;
+            if (dispatchesToday) {
+              remaining = cutoffHour * 3600 - secondsNow;
+            } else {
+              const daysUntilNextWorkingDay = { Mon: 1, Tue: 1, Wed: 1, Thu: 1, Fri: 3, Sat: 2, Sun: 1 }[parts.weekday];
+              const targetDate = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day) + daysUntilNextWorkingDay));
+              const target = localTimeToUtc(targetDate.getUTCFullYear(), targetDate.getUTCMonth() + 1, targetDate.getUTCDate(), cutoffHour);
+              remaining = Math.max(0, Math.floor((target - now.getTime()) / 1000));
+            }
             const timer = dispatch.querySelector('[data-pc-dispatch-time]');
             const lead = dispatch.querySelector('[data-pc-dispatch-lead]');
             const resultText = dispatch.querySelector('[data-pc-dispatch-result]');
-            if (isWorkingDay && remaining > 0) {
-              const hours = Math.floor(remaining / 3600);
-              const minutes = Math.floor((remaining % 3600) / 60);
-              const seconds = remaining % 60;
-              lead.textContent = 'Order within';
-              timer.textContent = [hours, minutes, seconds].map(value => String(value).padStart(2, '0')).join(':');
-              timer.hidden = false;
+            const hours = Math.floor(remaining / 3600);
+            const minutes = Math.floor((remaining % 3600) / 60);
+            const seconds = remaining % 60;
+            lead.textContent = 'Order within';
+            timer.textContent = [hours, minutes, seconds].map(value => String(value).padStart(2, '0')).join(':');
+            timer.hidden = false;
+            if (dispatchesToday) {
               resultText.textContent = "and we'll dispatch it today.";
               dispatch.classList.remove('is-next');
             } else {
-              lead.textContent = 'Order now';
-              timer.hidden = true;
               resultText.textContent = "and we'll dispatch it the next working day.";
               dispatch.classList.add('is-next');
             }
