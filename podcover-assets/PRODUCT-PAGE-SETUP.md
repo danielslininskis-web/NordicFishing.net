@@ -12,7 +12,9 @@ This replaces the existing product section with a rounded product stage, three b
 
 Existing product photos appear automatically. To show a photo for a particular colour, assign that photo to the corresponding variant in Shopify Admin → Products.
 
-Optional settings appear under the product section in the theme editor: photo background colour, subtitle override, free-shipping labels, genuine review ratings and a Trustpilot bar. Free-shipping labels assume a free standard shipping rate is configured in Shopify.
+Optional settings appear under the product section in the theme editor: photo background colour, subtitle override, free-shipping labels, same-day dispatch countdown, genuine review ratings and a Trustpilot bar. Free-shipping labels assume a free standard shipping rate is configured in Shopify.
+
+The dispatch message uses Copenhagen time. By default, orders placed before 15:00 Monday–Friday see a live countdown and the message that the order will be dispatched today. After the cutoff and on weekends, it changes to next-working-day dispatch. Open the product section's **Same-day dispatch** settings to change the weekday cutoff or hide the message. Only enable the promise if orders can consistently be handed to the carrier by the selected cutoff.
 
 To display Trustpilot, open the product section settings and add the genuine PodCover Trustpilot profile link. You may also add the current TrustScore and published review count. Keep those two values matched to the live Trustpilot profile. The bar stays hidden until a profile link is provided.
 
@@ -20,4 +22,4 @@ Ratings use Shopify's `reviews.rating` and `reviews.rating_count` metafields and
 
 ## Validation
 
-The Liquid/HTML parser, JSON section schema and JavaScript syntax passed. Browser checks used local Shopify fixtures at 320, 375, 390, 430, 760, 768, 999, 1000, 1024, 1280 and 1440 px with no horizontal overflow. Checks covered available/sold-out/nonexistent variant combinations, server-formatted prices, compare-at discounts, gallery thumbnails, variant images and fallback images, quantity limits, native forms without JavaScript, AJAX success/422 errors, existing cart drawer integration, localized endpoints, theme-editor section reload, genuine ratings and reduced motion. These are local checks, not a live Shopify checkout or order test.
+The Liquid/HTML parser, JSON section schema and JavaScript syntax passed. Browser checks used local Shopify fixtures at 320, 375, 390, 430, 760, 768, 999, 1000, 1024, 1280 and 1440 px with no horizontal overflow. Checks covered available/sold-out/nonexistent variant combinations, server-formatted prices, compare-at discounts, gallery thumbnails, variant images and fallback images, quantity limits, the Copenhagen dispatch countdown before and after its cutoff, native forms without JavaScript, AJAX success/422 errors, existing cart drawer integration, localized endpoints, theme-editor section reload, genuine ratings and reduced motion. These are local checks, not a live Shopify checkout or order test.
