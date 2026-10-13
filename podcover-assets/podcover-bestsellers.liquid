@@ -1,4 +1,16 @@
 {% liquid
+  if collection == blank
+    assign collection = section.settings.product_collection
+  endif
+  if collection == blank
+    assign collection = collections['best-sellers']
+  endif
+  if collection == blank
+    assign collection = collections['bestsellers']
+  endif
+  if collection == blank
+    assign collection = collections['all']
+  endif
   assign current_sort = collection.sort_by | default: collection.default_sort_by
   assign heading_id = 'pb-heading-' | append: section.id
 %}
@@ -24,6 +36,7 @@
       </div>
     </header>
 
+    {% if collection != blank %}
     {% paginate collection.products by section.settings.products_per_page %}
       {% liquid
         assign available_on_page = 0
@@ -43,7 +56,8 @@
 
       <div class="pb-toolbar" id="pb-products-{{ section.id }}">
         <p><strong>{{ collection.products_count }}</strong> {% if collection.products_count == 1 %}case{% else %}cases{% endif %} in the edit</p>
-        <form class="pb-sort" method="get">
+        {% if request.page_type == 'collection' %}
+        <form class="pb-sort" method="get" action="{{ collection.url }}">
           <label for="pb-sort-{{ section.id }}">Sort by</label>
           <div class="pb-select">
             <select id="pb-sort-{{ section.id }}" name="sort_by" data-pb-sort>
@@ -55,6 +69,7 @@
           </div>
           <button type="submit" data-pb-sort-submit>Apply</button>
         </form>
+        {% endif %}
       </div>
 
       <div class="pb-grid">
@@ -128,6 +143,20 @@
         <nav class="pb-pagination" aria-label="Best sellers pages">{{ paginate | default_pagination }}</nav>
       {% endif %}
     {% endpaginate %}
+    {% else %}
+      <div class="pb-grid" id="pb-products-{{ section.id }}">
+        <div class="pb-empty">
+          <p class="pb-eyebrow">THE NEXT EDIT</p>
+          <h2>A little more style.<br>Coming your way.</h2>
+          {% if request.design_mode %}
+            <p>Select a product collection in this section's settings to show your cases here.</p>
+          {% else %}
+            <p>Check back soon for the next PodCover edit.</p>
+          {% endif %}
+          <a class="pb-button" href="{{ routes.all_products_collection_url }}">Explore all cases <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    {% endif %}
 
     <section class="pb-closing" aria-labelledby="pb-closing-{{ section.id }}">
       <div><p class="pb-eyebrow">YOUR EVERYDAY, RECONSIDERED.</p><h2 id="pb-closing-{{ section.id }}">The detail<br>that goes <em>everywhere.</em></h2></div>
@@ -180,6 +209,7 @@
 {
   "name": "PodCover best sellers",
   "settings": [
+    { "type": "collection", "id": "product_collection", "label": "Product collection", "info": "On a regular page, choose your Best Sellers collection. Collection pages use their own products." },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Best sellers." },
     { "type": "textarea", "id": "intro", "label": "Introduction", "default": "A small detail. A whole new mood. Explore the PodCover edits made for your daily rotation." },
     { "type": "range", "id": "products_per_page", "label": "Products per page", "min": 4, "max": 24, "step": 4, "default": 12 }
