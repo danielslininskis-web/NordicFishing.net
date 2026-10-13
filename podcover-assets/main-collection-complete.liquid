@@ -1,0 +1,194 @@
+{% liquid
+  assign current_sort = collection.sort_by | default: collection.default_sort_by
+  assign available_count = 0
+  for listed_product in collection.products
+    if listed_product.available
+      assign available_count = available_count | plus: 1
+    endif
+  endfor
+%}
+
+<section class="pcoll" id="pcoll-{{ section.id }}">
+  <header class="pcoll-hero">
+    <div class="pcoll-hero-copy">
+      <span class="pcoll-eyebrow">{{ section.settings.eyebrow | escape }}</span>
+      <h1>
+        {% if section.settings.heading != blank %}
+          {{ section.settings.heading | escape }}
+        {% else %}
+          {{ collection.title | escape }}
+        {% endif %}
+      </h1>
+      {% if collection.description != blank %}
+        <div class="pcoll-description rte">{{ collection.description }}</div>
+      {% elsif section.settings.intro != blank %}
+        <p class="pcoll-description">{{ section.settings.intro | escape }}</p>
+      {% endif %}
+    </div>
+
+    <div class="pcoll-hero-note" aria-label="PodCover collection details">
+      <span>THE PODCOVER EDIT</span>
+      <strong>Made for your model.<br>Chosen for your style.</strong>
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="M15 24h18m-7-7 7 7-7 7"/></svg>
+    </div>
+  </header>
+
+  {% if collection.products_count > 0 and available_count == 0 %}
+    <div class="pcoll-restock" role="status">
+      <span class="pcoll-restock-dot" aria-hidden="true"></span>
+      <div>
+        <strong>Restock in progress.</strong>
+        <p>Our cases are currently out of stock. Explore the collection and check back for the next drop.</p>
+      </div>
+    </div>
+  {% endif %}
+
+  {% paginate collection.products by section.settings.products_per_page %}
+    <div class="pcoll-toolbar">
+      <p>
+        <span>{{ collection.products_count }}</span>
+        {% if collection.products_count == 1 %}case{% else %}cases{% endif %}
+      </p>
+
+      <form method="get" class="pcoll-sort">
+        <label for="pcoll-sort-{{ section.id }}">Sort by</label>
+        <div class="pcoll-select-wrap">
+          <select id="pcoll-sort-{{ section.id }}" name="sort_by" onchange="this.form.submit()">
+            {% for option in collection.sort_options %}
+              <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>{{ option.name | escape }}</option>
+            {% endfor %}
+          </select>
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+        </div>
+      </form>
+    </div>
+
+    <div class="pcoll-grid" style="--pcoll-columns: {{ section.settings.columns_desktop }};">
+      {% for product in collection.products %}
+        {% liquid
+          assign main_image = product.featured_image
+          assign hover_image = product.images[1]
+          assign main_alt = main_image.alt | default: product.title
+          assign hover_alt = hover_image.alt | default: product.title
+          assign model_count = 0
+          assign colour_count = 0
+          for product_option in product.options_with_values
+            assign option_name = product_option.name | downcase
+            if option_name contains 'model' or option_name contains 'airpods'
+              assign model_count = product_option.values.size
+            elsif option_name contains 'colour' or option_name contains 'color'
+              assign colour_count = product_option.values.size
+            endif
+          endfor
+        %}
+
+        <article class="pcoll-card pcoll-reveal">
+          <a class="pcoll-card-visual" href="{{ product.url | within: collection }}" aria-label="View {{ product.title | escape }}">
+            <span class="pcoll-card-number">0{{ forloop.index }}</span>
+            {% unless product.available %}<span class="pcoll-sold-badge">Out of stock</span>{% endunless %}
+
+            {% if main_image %}
+              {{ main_image | image_url: width: 1200 | image_tag: class: 'pcoll-card-image pcoll-card-image-main', loading: 'lazy', widths: '320, 480, 640, 900, 1200', sizes: '(min-width: 1000px) 42vw, (min-width: 620px) 46vw, 92vw', alt: main_alt }}
+              {% if hover_image %}
+                {{ hover_image | image_url: width: 1200 | image_tag: class: 'pcoll-card-image pcoll-card-image-hover', loading: 'lazy', widths: '320, 480, 640, 900, 1200', sizes: '(min-width: 1000px) 42vw, (min-width: 620px) 46vw, 92vw', alt: hover_alt }}
+              {% endif %}
+            {% else %}
+              <div class="pcoll-placeholder" aria-hidden="true">
+                <svg viewBox="0 0 280 220" fill="none"><rect x="61" y="71" width="158" height="107" rx="39"/><path d="M72 81c4-30 24-45 68-45s64 15 68 45M61 111h158"/><circle cx="140" cy="144" r="4"/></svg>
+              </div>
+            {% endif %}
+          </a>
+
+          <div class="pcoll-card-body">
+            <div class="pcoll-card-heading">
+              <div>
+                <span>PODCOVER / THE EVERYDAY EDIT</span>
+                <h2><a href="{{ product.url | within: collection }}">{{ product.title | escape }}</a></h2>
+              </div>
+              <a class="pcoll-arrow" href="{{ product.url | within: collection }}" aria-label="View {{ product.title | escape }}">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg>
+              </a>
+            </div>
+
+            <div class="pcoll-card-footer">
+              <div class="pcoll-card-facts">
+                {% if model_count > 0 %}<span>{{ model_count }} AirPods {% if model_count == 1 %}fit{% else %}fits{% endif %}</span>{% endif %}
+                {% if colour_count > 0 %}<span>{{ colour_count }} {% if colour_count == 1 %}colour{% else %}colours{% endif %}</span>{% endif %}
+                {% if model_count == 0 and colour_count == 0 %}<span>Choose your fit</span>{% endif %}
+              </div>
+
+              <div class="pcoll-price">
+                {% if product.available %}
+                  {% if product.price_varies %}<small>From</small>{% endif %}
+                  <strong>{{ product.price | money }}</strong>
+                  {% if product.compare_at_price_max > product.price %}<s>{{ product.compare_at_price_max | money }}</s>{% endif %}
+                {% else %}
+                  <strong>Restocking soon</strong>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </article>
+      {% else %}
+        <div class="pcoll-empty">
+          <span>THE NEXT DROP</span>
+          <h2>Something good is on the way.</h2>
+          <p>This collection is empty right now. Check back soon for the next PodCover release.</p>
+          <a href="{{ routes.root_url }}">Back home <span>↗</span></a>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if paginate.pages > 1 %}
+      <nav class="pcoll-pagination" aria-label="Collection pages">
+        {{ paginate | default_pagination }}
+      </nav>
+    {% endif %}
+  {% endpaginate %}
+
+  <div class="pcoll-service" aria-label="PodCover benefits">
+    <div><span>01</span><strong>Choose your fit.</strong><p>Select the case made for your AirPods model.</p></div>
+    <div><span>02</span><strong>Make it yours.</strong><p>Everyday colour with a clean, soft-touch finish.</p></div>
+    <div><span>03</span><strong>Take it along.</strong><p>Finished with a carabiner for life on the move.</p></div>
+  </div>
+</section>
+
+<style>
+  .pcoll{--pcoll-ink:#182c3a;--pcoll-muted:#657681;--pcoll-line:#dce3e7;--pcoll-paper:#f5f8fc;--pcoll-blue:#dceefa;color:var(--pcoll-ink);background:#fff;overflow:hidden}.pcoll *{box-sizing:border-box}.pcoll a{color:inherit;text-decoration:none}.pcoll svg{stroke:currentColor;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round}.pcoll-hero{min-height:430px;padding:clamp(65px,8vw,120px) max(5vw,calc((100vw - 1440px)/2 + 72px));display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);align-items:end;gap:60px;background:var(--pcoll-paper);border-top:1px solid var(--pcoll-line);border-bottom:1px solid var(--pcoll-line)}.pcoll-eyebrow,.pcoll-card-heading span,.pcoll-hero-note>span,.pcoll-empty>span{display:block;font-size:9px;font-weight:700;letter-spacing:.19em;line-height:1.5}.pcoll-hero h1{max-width:900px;margin:19px 0 22px;font-size:clamp(55px,7.5vw,112px);font-weight:560;letter-spacing:-.075em;line-height:.93}.pcoll-description{max-width:580px;margin:0;color:var(--pcoll-muted);font-size:15px;line-height:1.75}.pcoll-description>*:last-child{margin-bottom:0}.pcoll-hero-note{justify-self:end;width:min(100%,330px);padding:22px 0 0;border-top:1px solid #aebcc4;display:grid;grid-template-columns:1fr auto;gap:16px 20px;align-items:end}.pcoll-hero-note>span{grid-column:1/-1}.pcoll-hero-note strong{font-size:16px;line-height:1.45;letter-spacing:-.025em}.pcoll-hero-note svg{width:48px;height:48px}.pcoll-restock{max-width:1296px;margin:40px auto 0;padding:18px 22px;display:flex;align-items:center;gap:15px;border:1px solid #ded9cf;border-radius:14px;background:#f7f4ed}.pcoll-restock-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#9d825c;box-shadow:0 0 0 6px #e9dfce}.pcoll-restock strong{display:block;font-size:13px;margin-bottom:3px}.pcoll-restock p{margin:0;color:#776f64;font-size:11px;line-height:1.55}.pcoll-toolbar{max-width:1296px;margin:0 auto;padding:50px 0 19px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--pcoll-line)}.pcoll-toolbar>p{margin:0;color:var(--pcoll-muted);font-size:11px}.pcoll-toolbar>p span{color:var(--pcoll-ink);font-size:19px;font-weight:650;margin-right:6px}.pcoll-sort{display:flex;align-items:center;gap:13px;font-size:11px}.pcoll-sort label{font-weight:650}.pcoll-select-wrap{position:relative}.pcoll-select-wrap select{min-width:165px;min-height:42px;padding:10px 37px 10px 13px;border:1px solid var(--pcoll-line);border-radius:9px;background:#fff;color:var(--pcoll-ink);appearance:none;font-size:11px}.pcoll-select-wrap svg{position:absolute;right:12px;top:50%;width:16px;height:16px;transform:translateY(-50%);pointer-events:none}.pcoll-grid{max-width:1296px;margin:0 auto;padding:34px 0 105px;display:grid;grid-template-columns:repeat(var(--pcoll-columns),minmax(0,1fr));gap:64px 22px}.pcoll-card{min-width:0}.pcoll-card-visual{position:relative;display:grid;place-items:center;aspect-ratio:1.16;overflow:hidden;border-radius:18px;background:#f2f4f3}.pcoll-card-number,.pcoll-sold-badge{position:absolute;z-index:3;top:15px;padding:8px 11px;border-radius:999px;background:#ffffffd9;backdrop-filter:blur(8px);font-size:8px;letter-spacing:.13em}.pcoll-card-number{left:15px}.pcoll-sold-badge{right:15px;background:#202321;color:#fff;font-weight:700;letter-spacing:.04em}.pcoll-card-image{grid-area:1/1;width:100%;height:100%;object-fit:contain;transition:opacity .45s ease,transform .65s cubic-bezier(.2,.75,.2,1)}.pcoll-card-image-hover{opacity:0}.pcoll-card-visual:hover .pcoll-card-image-main{opacity:0}.pcoll-card-visual:hover .pcoll-card-image-hover{opacity:1;transform:scale(1.025)}.pcoll-placeholder{width:70%;color:#98a7ad}.pcoll-placeholder svg{width:100%;stroke-width:2}.pcoll-card-body{padding:19px 3px 0}.pcoll-card-heading{display:flex;justify-content:space-between;gap:18px;align-items:start}.pcoll-card-heading span{color:#778893;font-size:8px}.pcoll-card-heading h2{margin:7px 0 0;font-family:inherit;font-size:clamp(20px,2vw,28px);font-weight:600;letter-spacing:-.045em;line-height:1.15}.pcoll-arrow{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid var(--pcoll-line);border-radius:50%;transition:background .2s,color .2s,transform .2s}.pcoll-arrow svg{width:17px;height:17px}.pcoll-arrow:hover{background:var(--pcoll-ink);color:#fff;transform:translateY(-2px)}.pcoll-card-footer{margin-top:19px;padding-top:14px;border-top:1px solid var(--pcoll-line);display:flex;justify-content:space-between;gap:15px;align-items:end}.pcoll-card-facts{display:flex;gap:6px;flex-wrap:wrap}.pcoll-card-facts span{padding:6px 9px;border-radius:999px;background:#eef2f4;color:#64747d;font-size:9px;line-height:1.3}.pcoll-price{display:flex;justify-content:flex-end;align-items:baseline;gap:7px;text-align:right;white-space:nowrap}.pcoll-price small{font-size:9px;color:var(--pcoll-muted)}.pcoll-price strong{font-size:14px}.pcoll-price s{font-size:10px;color:#8e989e}.pcoll-empty{grid-column:1/-1;max-width:700px;padding:80px 0 30px}.pcoll-empty h2{margin:15px 0;font-size:clamp(34px,5vw,65px);font-weight:560;letter-spacing:-.06em}.pcoll-empty p{max-width:520px;color:var(--pcoll-muted);line-height:1.7}.pcoll-empty a{display:inline-flex;gap:45px;margin-top:20px;padding-bottom:7px;border-bottom:1px solid;font-size:12px;font-weight:700}.pcoll-pagination{max-width:1296px;margin:-55px auto 85px}.pcoll-pagination .page,.pcoll-pagination .next,.pcoll-pagination .prev{display:inline-grid;place-items:center;min-width:38px;height:38px;margin-right:5px;border:1px solid var(--pcoll-line);border-radius:50%;font-size:11px}.pcoll-pagination .current{background:var(--pcoll-ink);color:#fff}.pcoll-service{max-width:1440px;margin:0 auto 105px;padding:40px 72px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--pcoll-ink);color:#fff;border-radius:21px}.pcoll-service>div{padding:5px 38px;border-right:1px solid #ffffff26}.pcoll-service>div:first-child{padding-left:0}.pcoll-service>div:last-child{border:0;padding-right:0}.pcoll-service span{display:block;margin-bottom:25px;color:#9fc8dc;font-size:9px;letter-spacing:.15em}.pcoll-service strong{display:block;font-size:15px;margin-bottom:8px}.pcoll-service p{max-width:260px;margin:0;color:#b8c2c7;font-size:11px;line-height:1.6}.pcoll.is-motion .pcoll-reveal{opacity:0;transform:translateY(18px)}.pcoll.is-motion .pcoll-reveal.is-visible{opacity:1;transform:none;transition:opacity .55s ease,transform .55s ease}.pcoll.is-motion .pcoll-reveal:nth-child(2n){transition-delay:.08s}
+  @media(max-width:1500px){.pcoll-toolbar,.pcoll-grid,.pcoll-restock{margin-left:5%;margin-right:5%}.pcoll-service{margin-left:5%;margin-right:5%}}
+  @media(max-width:900px){.pcoll-hero{grid-template-columns:1fr;min-height:0;gap:55px}.pcoll-hero-note{justify-self:start}.pcoll-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.pcoll-service{padding:35px;grid-template-columns:1fr;gap:24px}.pcoll-service>div,.pcoll-service>div:first-child,.pcoll-service>div:last-child{padding:0 0 24px;border-right:0;border-bottom:1px solid #ffffff26}.pcoll-service>div:last-child{padding-bottom:0;border-bottom:0}.pcoll-service span{margin-bottom:12px}}
+  @media(max-width:620px){.pcoll-hero{padding:58px 5% 48px;gap:42px}.pcoll-hero h1{font-size:clamp(50px,16vw,72px)}.pcoll-description{font-size:13px}.pcoll-hero-note{width:100%}.pcoll-restock{margin-top:25px;padding:15px 17px}.pcoll-toolbar{padding-top:35px;align-items:end}.pcoll-toolbar>p span{display:block;margin:0}.pcoll-sort{align-items:flex-start;flex-direction:column;gap:6px}.pcoll-select-wrap select{min-width:145px}.pcoll-grid{grid-template-columns:1fr!important;padding-top:22px;padding-bottom:70px;gap:48px}.pcoll-card-visual{border-radius:15px;aspect-ratio:1.08}.pcoll-card-image-hover{display:none}.pcoll-card-visual:hover .pcoll-card-image-main{opacity:1}.pcoll-card-heading h2{font-size:24px}.pcoll-card-footer{align-items:start}.pcoll-service{margin-bottom:70px;padding:29px 24px;border-radius:16px}.pcoll-pagination{margin-left:5%;margin-right:5%}}
+  @media(prefers-reduced-motion:reduce){.pcoll-card-image,.pcoll-arrow,.pcoll-reveal{transition:none!important}.pcoll.is-motion .pcoll-reveal{opacity:1;transform:none}}
+</style>
+
+<script>
+  (() => {
+    const initCollection = root => {
+      if (!root || root.dataset.pcollReady === 'true') return;
+      root.dataset.pcollReady = 'true';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+      root.classList.add('is-motion');
+      const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }), { threshold: .08 });
+      root.querySelectorAll('.pcoll-reveal').forEach(card => observer.observe(card));
+    };
+    initCollection(document.getElementById('pcoll-{{ section.id }}'));
+    document.addEventListener('shopify:section:load', event => initCollection(event.target.querySelector('.pcoll')));
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "PodCover collection",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "PODCOVER / SHOP THE EDIT" },
+    { "type": "text", "id": "heading", "label": "Heading override", "info": "Leave blank to use the collection name." },
+    { "type": "text", "id": "intro", "label": "Intro fallback", "default": "Small details for your everyday. Find the colour and fit that feels like you." },
+    { "type": "range", "id": "products_per_page", "label": "Products per page", "min": 8, "max": 32, "step": 4, "default": 24 },
+    { "type": "range", "id": "columns_desktop", "label": "Desktop columns", "min": 2, "max": 3, "step": 1, "default": 2 }
+  ]
+}
+{% endschema %}
