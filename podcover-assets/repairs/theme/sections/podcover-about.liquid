@@ -1,0 +1,100 @@
+{% liquid
+  assign blue = section.settings.blue_product
+  if blue == blank
+    assign blue = all_products['blue-cloud-airpods-case']
+  endif
+  assign colours = section.settings.colour_product
+  if colours == blank
+    assign colours = all_products['podcover-colour-edit-airpods-case']
+  endif
+  assign blue_url = blue.url | default: routes.all_products_collection_url
+  assign colour_url = colours.url | default: routes.all_products_collection_url
+%}
+
+<section class="pc-about" aria-labelledby="pc-about-title-{{ section.id }}">
+  <header class="pc-about-hero">
+    <div class="pc-about-copy">
+      <span class="pc-about-eyebrow">PODCOVER / OUR STORY</span>
+      <h1 id="pc-about-title-{{ section.id }}">Small things.<br><em>Big feeling.</em></h1>
+      <p>PodCover makes everyday tech feel a little more personal. Colour, character, and the details you carry with you.</p>
+      <a class="pc-about-button" href="{{ routes.all_products_collection_url }}">Explore the cases <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+    </div>
+    <div class="pc-about-image">
+      {% if section.settings.hero_image != blank %}
+        {{ section.settings.hero_image | image_url: width: 1200 | image_tag: widths: '400, 650, 900, 1200', sizes: '(max-width: 760px) 100vw, 50vw', loading: 'eager', alt: 'Blue Cloud AirPods case in everyday use' }}
+      {% else %}
+        <img src="{{ 'blue-cloud.jpg' | asset_url }}" alt="Blue Cloud AirPods case in everyday use" width="1920" height="1920" loading="eager">
+      {% endif %}
+    </div>
+  </header>
+  <div class="pc-about-statement">
+    <span class="pc-about-eyebrow">WHY PODCOVER</span>
+    <h2>Accessories should<br>feel like <em>you.</em></h2>
+    <p>Your headphones go everywhere with you. The case around them should add something too: your favourite shade, a little shine, a detail that feels your own.</p>
+  </div>
+  <div class="pc-about-grid">
+    <article><span>01</span><h2>Made to stand out</h2><p>Expressive colours and clean shapes. Small details with their own personality.</p></article>
+    <article><span>02</span><h2>For everyday carry</h2><p>Cases for the essentials you reach for on coffee runs, commutes, and everything in between.</p></article>
+    <article><span>03</span><h2>Your style, your way</h2><p>A glossy little piece of sky or a quieter matte shade. Choose the edit that feels like you.</p></article>
+  </div>
+  <div class="pc-about-edits">
+    <div class="pc-about-edits-heading"><span class="pc-about-eyebrow">TWO EDITS. YOUR EVERYDAY.</span><h2>Find your <em>finishing touch.</em></h2></div>
+    <div class="pc-about-edit-grid">
+      <article>
+        <span class="pc-about-eyebrow">THE BLUE CLOUD EDIT</span>
+        <h3>Blue Cloud.</h3>
+        <p>A glossy blue finish with cloudlike colour and a silver ball-chain detail. Available for AirPods Pro 2, Pro 3, and AirPods 4.</p>
+        {% if blue != blank %}<p class="pc-about-price">{% if blue.price_varies %}From {% endif %}{{ blue.price | money }}{% unless blue.available %}<span>Out of stock</span>{% endunless %}</p>{% endif %}
+        <a href="{{ blue_url }}">Explore Blue Cloud <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+      </article>
+      <article>
+        <span class="pc-about-eyebrow">THE COLOUR EDIT</span>
+        <h3>Everyday colour.</h3>
+        <p>A matte finish and black carabiner. Pro 2 comes in Black, White, Matcha Green, and Lavender. Pro 3 comes in Black and White.</p>
+        {% if colours != blank %}<p class="pc-about-price">{% if colours.price_varies %}From {% endif %}{{ colours.price | money }}{% unless colours.available %}<span>Out of stock</span>{% endunless %}</p>{% endif %}
+        <a href="{{ colour_url }}">Explore the Colour Edit <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+.pc-about{--pc-about-ink:#182c3a;--pc-about-muted:#526575;background:#fff;color:var(--pc-about-ink)}
+.pc-about *,.pc-about *::before,.pc-about *::after{box-sizing:border-box}
+.pc-about a{color:inherit;text-decoration:none}
+.pc-about-hero{display:grid;grid-template-columns:1fr 1fr;background:#f1f4f8}
+.pc-about-copy{padding:clamp(65px,8vw,120px) clamp(24px,6vw,90px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.pc-about-eyebrow{display:block;margin-bottom:22px;font-size:11px;font-weight:700;letter-spacing:.16em;line-height:1.6}
+.pc-about h1,.pc-about h2,.pc-about h3{margin:0;font-family:Manrope,Arial,sans-serif;font-weight:500;letter-spacing:-.055em;line-height:1.05}
+.pc-about h1{font-size:clamp(50px,6vw,88px)}
+.pc-about h1 em,.pc-about h2 em{color:#397599;font-family:Georgia,'Times New Roman',serif;font-weight:400}
+.pc-about p{color:var(--pc-about-muted);font-size:15px;line-height:1.85}
+.pc-about-copy p{max-width:390px;margin:30px 0}
+.pc-about-button{display:inline-flex;align-items:center;justify-content:space-between;gap:45px;min-height:48px;padding:17px 24px;background:#182c3a;color:#fff!important;font-size:13px;font-weight:700;transition:transform .2s,background .2s}
+.pc-about-button:hover{transform:translateY(-2px);background:#30526a}
+.pc-about-image{min-width:0;background:#eef2f4;overflow:hidden}
+.pc-about-image img{display:block;width:100%;height:100%;min-height:480px;object-fit:cover}
+.pc-about-statement{max-width:760px;margin:auto;text-align:center;padding:95px 6% 70px}
+.pc-about-statement h2{font-size:clamp(40px,4.6vw,66px)}
+.pc-about-statement p{max-width:560px;margin:28px auto 0}
+.pc-about-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;max-width:1350px;margin:auto;padding:20px 6% 100px}
+.pc-about-grid article{padding-top:25px;border-top:1px solid #cbd5dc}
+.pc-about-grid article>span{display:block;margin-bottom:28px;font-size:12px;color:#526575}
+.pc-about-grid h2{font-size:25px;letter-spacing:-.035em}
+.pc-about-edits{background:#f1f4f8;padding:75px 6% 85px}
+.pc-about-edits-heading,.pc-about-edit-grid{max-width:1180px;margin:auto}
+.pc-about-edits-heading h2{font-size:clamp(36px,4vw,58px)}
+.pc-about-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:70px;margin-top:50px}
+.pc-about-edit-grid article{min-width:0;padding-top:30px;border-top:1px solid #cbd5dc}
+.pc-about-edit-grid h3{font-size:34px}
+.pc-about-price{display:flex;align-items:center;flex-wrap:wrap;gap:20px;color:#182c3a!important;font-size:14px!important}
+.pc-about-price span{padding:5px 9px;background:#e1e7eb;font-size:12px}
+.pc-about-edit-grid a{display:inline-flex;align-items:center;justify-content:space-between;gap:35px;min-height:44px;margin-top:10px;border-bottom:1px solid #182c3a;font-size:13px;font-weight:700}
+.pc-about a:focus-visible{outline:2px solid #397599;outline-offset:5px}
+@media(max-width:760px){.pc-about-hero{grid-template-columns:1fr}.pc-about-copy{padding:65px 6%}.pc-about h1{font-size:clamp(44px,13vw,70px)}.pc-about-image img{min-height:0;aspect-ratio:1/1}.pc-about-statement{padding:65px 6% 40px}.pc-about-grid{grid-template-columns:1fr;gap:25px;padding:20px 6% 65px}.pc-about-grid article>span{margin-bottom:18px}.pc-about-edits{padding:60px 6%}.pc-about-edit-grid{grid-template-columns:1fr;gap:40px;margin-top:35px}.pc-about-edit-grid h3{font-size:30px}.pc-about h2{overflow-wrap:break-word}}
+@media(prefers-reduced-motion:reduce){.pc-about-button{transition:none}}
+</style>
+
+{% schema %}
+{"name":"PodCover about","settings":[{"type":"product","id":"blue_product","label":"Blue Cloud product"},{"type":"product","id":"colour_product","label":"Colour Edit product"},{"type":"image_picker","id":"hero_image","label":"Story image"}]}
+{% endschema %}

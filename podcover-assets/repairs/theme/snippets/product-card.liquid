@@ -1,0 +1,32 @@
+{% liquid
+  assign card_alt = product.featured_image.alt | default: product.title
+  assign card_image = product.featured_image
+  assign card_compare_price = blank
+  for card_variant in product.variants
+    if card_variant.price == product.price
+      assign card_compare_price = card_variant.compare_at_price
+      break
+    endif
+  endfor
+%}
+<article class="product-card{% unless product.available %} product-card-sold-out{% endunless %}">
+  <a href="{{ product.url }}" class="card-image" aria-label="View {{ product.title | escape }}">
+    {% if card_image %}
+      {{ card_image | image_url: width: 900 | image_tag: loading: 'lazy', widths: '240, 360, 540, 750, 900', sizes: '(min-width: 1000px) 30vw, (min-width: 600px) 45vw, 90vw', alt: card_alt }}
+    {% else %}
+      <span class="card-image-missing"><span>PodCover</span><span>{{ product.title | escape }}</span></span>
+    {% endif %}
+    {% unless product.available %}<span class="card-stock-badge">Out of stock</span>{% endunless %}
+  </a>
+  <div class="card-meta">
+    <div>
+      <a href="{{ product.url }}"><h3>{{ product.title | escape }}</h3></a>
+      {% if product.available %}
+        <p>{% if product.price_varies %}From {% endif %}{{ product.price | money }}{% if card_compare_price > product.price %} <s>{{ card_compare_price | money }}</s>{% endif %}</p>
+      {% else %}
+        <p class="card-stock-note">Restocking soon</p>
+      {% endif %}
+    </div>
+    <a class="round-arrow" href="{{ product.url }}" aria-label="View {{ product.title | escape }}">↗</a>
+  </div>
+</article>

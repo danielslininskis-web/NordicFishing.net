@@ -1,0 +1,360 @@
+{% liquid
+  assign blue = section.settings.featured_product
+  if blue == blank
+    assign blue = all_products['blue-cloud-airpods-case']
+  endif
+  assign colours = section.settings.new_product
+  if colours == blank
+    assign colours = all_products['podcover-colour-edit-airpods-case']
+  endif
+  assign blue_url = blue.url | default: routes.all_products_collection_url
+  assign colours_url = colours.url | default: routes.all_products_collection_url
+  assign newsletter_id = 'PodCoverList-' | append: section.id
+%}
+{% capture arrow %}<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg>{% endcapture %}
+
+<div class="pe-home" id="pe-{{ section.id }}">
+  <section class="pe-hero" aria-labelledby="pe-title-{{ section.id }}">
+    <div class="pe-hero-copy">
+      <span class="pe-kicker">PODCOVER / THE BLUE CLOUD EDIT</span>
+      <h1 id="pe-title-{{ section.id }}">Your AirPods.<br><span>Your Style.</span></h1>
+      <p>A glossy blue finish. A little silver shine. Make your everyday essential unmistakably yours.</p>
+      {% if blue != blank %}<p class="pe-stock{% unless blue.available %} pe-stock--out{% endunless %}">{% if blue.available %}Blue Cloud · In stock{% else %}Blue Cloud · Out of stock{% endif %}</p>{% endif %}
+      <a class="pe-button" href="{{ routes.all_products_collection_url }}">{% if blue.available or colours.available %}Shop Collection{% else %}Explore Collection{% endif %} {{ arrow }}</a>
+    </div>
+    <div class="pe-hero-visual">
+      <div class="pe-image-label"><span>BLUE CLOUD</span><span>DROP 001</span></div>
+      {% if section.settings.blue_hero_image != blank %}
+        {{ section.settings.blue_hero_image | image_url: width: 1600 | image_tag: widths: '500, 900, 1200, 1600', sizes: '(max-width: 760px) 94vw, 51vw', loading: 'eager', fetchpriority: 'high', alt: 'Blue Cloud AirPods case with silver ball chain' }}
+      {% else %}
+        <img src="{{ 'blue-cloud-studio.jpg' | asset_url }}" width="1254" height="1254" alt="Blue Cloud AirPods case with silver ball chain" fetchpriority="high">
+      {% endif %}
+    </div>
+    <div class="pe-hero-foot"><span>SMALL DETAILS. DISTINCTIVE STYLE.</span><a href="#pe-colours-{{ section.id }}">Explore the next edit <span aria-hidden="true">↓</span></a></div>
+  </section>
+
+  {% capture ticker_words %}<span>Cloudlike colour</span><i aria-hidden="true">×</i><span>High-shine finish</span><i aria-hidden="true">×</i><span>Silver chain detail</span><i aria-hidden="true">×</i><span>Matcha green</span><i aria-hidden="true">×</i><span>Black · White · Lavender</span><i aria-hidden="true">×</i><span>Made to express you</span><i aria-hidden="true">×</i>{% endcapture %}
+  <div class="pe-ticker">
+    <div class="pe-ticker-window"><div class="pe-ticker-track"><div class="pe-ticker-group">{{ ticker_words }}</div><div class="pe-ticker-group" aria-hidden="true">{{ ticker_words }}</div></div></div>
+    <button class="pe-pause" type="button" aria-label="Pause scrolling text" aria-pressed="false" hidden>Pause</button>
+  </div>
+
+  <section class="pe-palette pe-wrap" id="pe-colours-{{ section.id }}" aria-labelledby="pe-palette-title-{{ section.id }}">
+    <div class="pe-palette-heading">
+      <div><span class="pe-kicker">INTRODUCING / THE COLOUR EDIT</span><p>A softer finish.<br>A different kind of statement.</p></div>
+      <h2 id="pe-palette-title-{{ section.id }}">Meet your<br>next <em>colour.</em></h2>
+    </div>
+    <figure class="pe-campaign">
+      {% if section.settings.palette_image != blank %}
+        {{ section.settings.palette_image | image_url: width: 2000, format: 'pjpg' | image_tag: widths: '480, 750, 1100, 1500, 2000', sizes: '(min-width: 1440px) 1268px, 88vw', loading: 'lazy', alt: 'Matcha green, black, white and lavender cases arranged on ivory fabric' }}
+      {% elsif colours.featured_image != blank %}
+        {{ colours.featured_image | image_url: width: 2000, format: 'pjpg' | image_tag: widths: '480, 750, 1100, 1500, 2000', sizes: '(min-width: 1440px) 1268px, 88vw', loading: 'lazy', alt: colours.title }}
+      {% else %}
+        <div class="pe-photo-placeholder">The colour edit<br><small>Matcha green · Black · White · Lavender</small></div>
+      {% endif %}
+      <figcaption><span>FOUR COLOURS. ONE EVERYDAY ESSENTIAL.</span><span>PODCOVER / COLOUR STUDY 01</span></figcaption>
+    </figure>
+    <div class="pe-colour-links">
+      {% assign colour_names = 'Matcha green|Black|White|Lavender' | split: '|' %}
+      {% assign colour_keys = 'matcha|black|white|lavender' | split: '|' %}
+      {% assign colour_hex = '#a3b393|#252626|#f4f2ec|#bca9ce' | split: '|' %}
+      {% assign colour_notes = 'A fresh perspective.|Always in rotation.|Keep it clean.|A softer statement.' | split: '|' %}
+      {% for colour_name in colour_names %}
+        {% liquid
+          assign colour_index = forloop.index0
+          assign colour_key = colour_keys[colour_index]
+          assign colour_url = colours_url
+          assign colour_variant = nil
+          if colours != blank
+            for variant in colours.variants
+              assign variant_name = variant.title | downcase
+              if variant_name contains colour_key
+                if colour_variant == nil
+                  assign colour_variant = variant
+                endif
+                if variant.available
+                  assign colour_variant = variant
+                  break
+                endif
+              endif
+            endfor
+            if colour_variant != nil
+              assign colour_url = colours.url | append: '?variant=' | append: colour_variant.id
+            endif
+          endif
+        %}
+        <a class="pe-colour-link" href="{{ colour_url }}">
+          <span class="pe-colour-top"><span>0{{ forloop.index }}</span><span class="pe-swatch" style="--swatch:{{ colour_hex[colour_index] }}" aria-hidden="true"></span></span>
+          <h3>{{ colour_name }}</h3><p>{{ colour_notes[colour_index] }}</p>
+          {% if colour_variant != nil %}<span class="pe-colour-stock">{% if colour_variant.available %}In stock{% else %}Out of stock{% endif %}</span>{% endif %}
+          <span class="pe-colour-arrow">{{ arrow }}</span>
+        </a>
+      {% endfor %}
+    </div>
+    <div class="pe-palette-bottom">
+      <p>{% if colours != blank %}{{ colours.title | escape }}{% if colours.price_varies %} · From{% else %} ·{% endif %} {{ colours.price | money }}<br><span class="pe-stock{% unless colours.available %} pe-stock--out{% endunless %}">{% if colours.available %}In stock{% else %}Out of stock{% endif %}</span>{% else %}Find your shade. Choose your AirPods model on the product page.{% endif %}</p>
+      <a class="pe-text-link" href="{{ colours_url }}">Explore the colour edit {{ arrow }}</a>
+    </div>
+  </section>
+
+  <section class="pe-blue-story" aria-labelledby="pe-story-title-{{ section.id }}">
+    <div class="pe-blue-story-photo">
+      <img src="{{ 'blue-cloud.jpg' | asset_url }}" width="1920" height="1920" alt="Blue Cloud case held beside a black bag" loading="lazy">
+      <span>OUT IN THE EVERYDAY.</span>
+    </div>
+    <div class="pe-blue-story-copy">
+      <span class="pe-kicker">SMALL DETAIL. BIG FEELING.</span>
+      <h2 id="pe-story-title-{{ section.id }}">Your essentials.<br>A little more <em>you.</em></h2>
+      <p>For coffee runs, long playlists, and everything in between. A pop of blue that feels right at home in your daily rotation.</p>
+      <a class="pe-text-link" href="{{ blue_url }}">{% if blue.available %}Make it yours{% else %}Explore Blue Cloud{% endif %} {{ arrow }}</a>
+      <span class="pe-signature">PODCOVER / MADE TO EXPRESS YOU</span>
+    </div>
+  </section>
+
+  <section class="pe-everyday" aria-labelledby="pe-everyday-title-{{ section.id }}">
+    <div class="pe-everyday-head pe-wrap">
+      <div>
+        <span class="pe-kicker">02 / MADE FOR THE EVERYDAY</span>
+        <h2 id="pe-everyday-title-{{ section.id }}">Made to go.<br>Made for <em>you.</em></h2>
+      </div>
+      <div class="pe-everyday-intro">
+        <p>A little colour, a useful clip, and the right fit for your AirPods. Everything you need, without overthinking it.</p>
+        <a class="pe-text-link" href="{{ colours_url }}">Explore the colour edit {{ arrow }}</a>
+      </div>
+    </div>
+
+    <div class="pe-everyday-grid">
+      <article class="pe-everyday-card pe-everyday-card--green">
+        <span>01 / CARRY</span>
+        <div><h3>Clip it on.</h3><p>The black carabiner keeps your case close when you are on the move.</p></div>
+      </article>
+      <article class="pe-everyday-card pe-everyday-card--cream">
+        <span>02 / CHARGE</span>
+        <div><h3>Keep it simple.</h3><p>Charge through the opening or place the case on a compatible wireless charger.</p></div>
+      </article>
+      <article class="pe-everyday-card pe-everyday-card--lavender">
+        <span>03 / FIT</span>
+        <div><h3>Choose yours.</h3><p>Select the matching AirPods model and the colour that feels most like you.</p></div>
+      </article>
+    </div>
+
+    <div class="pe-everyday-foot pe-wrap">
+      <span class="pe-everyday-swatches" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span>MATCHA · BLACK · WHITE · LAVENDER</span>
+    </div>
+  </section>
+
+  <section class="pe-finish pe-wrap" aria-labelledby="pe-finish-title-{{ section.id }}">
+    <div><span class="pe-kicker">FIND YOUR FINISH</span><h2 id="pe-finish-title-{{ section.id }}">Two moods.<br>Same <em>you.</em></h2></div>
+    <div class="pe-finish-links">
+      <a class="pe-finish-row" href="{{ blue_url }}"><span class="pe-finish-number">01</span><div><h3>Blue Cloud</h3><p>Glossy blue. Silver chain. A little extra shine.</p>{% if blue != blank %}<span class="pe-colour-stock">{% if blue.available %}In stock{% else %}Out of stock{% endif %}</span>{% endif %}</div><span class="pe-finish-tag">GLOSSY</span>{{ arrow }}</a>
+      <a class="pe-finish-row" href="{{ colours_url }}"><span class="pe-finish-number">02</span><div><h3>The colour edit</h3><p>Matcha, black, white, or lavender. Keep it understated.</p>{% if colours != blank %}<span class="pe-colour-stock">{% if colours.available %}In stock{% else %}Out of stock{% endif %}</span>{% endif %}</div><span class="pe-finish-tag">MATTE</span>{{ arrow }}</a>
+    </div>
+  </section>
+
+  <section class="pe-newsletter" aria-labelledby="pe-news-title-{{ section.id }}">
+    <div class="pe-news-inner pe-wrap">
+      <div><span class="pe-kicker">LET'S KEEP IN TOUCH</span><h2 id="pe-news-title-{{ section.id }}">More good things<br>on the <em>horizon.</em></h2><p>Be the first to hear about new drops and brand updates.</p></div>
+      {% form 'customer', id: newsletter_id, class: 'pe-email-form' %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        {% if form.posted_successfully? %}
+          <p role="status">You're on the list. See you at the next drop.</p>
+        {% else %}
+          {% if form.errors %}<div id="pe-errors-{{ section.id }}" role="alert">{{ form.errors | default_errors }}</div>{% endif %}
+          <label for="pe-email-{{ section.id }}">Your email address</label>
+          <div class="pe-email-row"><input id="pe-email-{{ section.id }}" name="contact[email]" type="email" value="{{ form.email | escape }}" placeholder="you@example.com" autocomplete="email" required {% if form.errors %}aria-invalid="true" aria-describedby="pe-errors-{{ section.id }}"{% endif %}><button type="submit">Join the list {{ arrow }}</button></div>
+          <p class="pe-email-note">New drops. Little updates. Straight to your inbox. Unsubscribe anytime.</p>
+        {% endif %}
+      {% endform %}
+    </div>
+  </section>
+</div>
+
+<style>
+.pe-home{--pe-ink:#182c3a;--pe-muted:#526575;--pe-line:#dce3e7;color:var(--pe-ink);background:#fff}
+.pe-home *,.pe-home *::before,.pe-home *::after{box-sizing:border-box}
+.pe-home a{color:inherit;text-decoration:none}
+.pe-home img{display:block;max-width:100%}
+.pe-home svg{flex-shrink:0;vertical-align:middle}
+.pe-home h1,.pe-home h2,.pe-home h3{font-family:Manrope,Arial,sans-serif;font-weight:500;letter-spacing:-.055em;line-height:1.04;margin:0;color:var(--pe-ink)}
+.pe-home h2{font-size:clamp(36px,4.4vw,68px)}
+.pe-home h3{font-size:23px;line-height:1.2}
+.pe-home em{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;color:#397599}
+.pe-home p{color:var(--pe-muted);font-size:15px;line-height:1.8}
+.pe-home .pe-kicker{display:block;font-size:10px;font-weight:600;letter-spacing:.18em;line-height:1.6;margin-bottom:24px}
+.pe-home .pe-wrap{max-width:1440px;margin-inline:auto;padding-inline:6%}
+.pe-home .pe-button{display:inline-flex;align-items:center;justify-content:space-between;gap:40px;min-height:54px;padding:16px 24px;background:#12161b;color:#fff;font-size:13px;font-weight:600;transition:background .2s,transform .2s}
+.pe-home .pe-button:hover{background:#30526a;transform:translateY(-2px)}
+.pe-home .pe-text-link{display:inline-flex;align-items:center;justify-content:space-between;gap:40px;border-bottom:1px solid var(--pe-ink);padding:12px 0;font-size:13px;font-weight:600}
+.pe-home .pe-text-link:hover{color:#397599}
+.pe-home .pe-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:1fr auto;min-height:calc(100svh - var(--pe-top,100px));background:#f1f4f8;overflow:hidden}
+.pe-home .pe-hero-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:70px 3vw 70px 6vw}
+.pe-home .pe-hero h1{font-size:clamp(48px,6.6vw,106px);line-height:1.02;letter-spacing:-.065em;color:#12161b}
+.pe-home .pe-hero h1 span{color:#62666b}
+.pe-home .pe-hero-copy p{max-width:350px;margin:30px 0;color:#61676d;font-size:14px;line-height:1.8}
+.pe-home .pe-hero-copy .pe-kicker{color:#52616d;font-size:11px;margin-bottom:36px}
+.pe-home .pe-stock{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;line-height:1.6;color:#355544}
+.pe-home .pe-stock::before{content:'';width:6px;height:6px;flex-shrink:0;border-radius:50%;background:currentColor}
+.pe-home .pe-stock--out{color:#526575}
+.pe-home .pe-hero-copy .pe-stock{margin:-12px 0 22px;font-size:12px;color:#355544}
+.pe-home .pe-hero-copy .pe-stock--out{color:#526575}
+.pe-home .pe-hero-visual{position:relative;min-width:0;display:flex;align-items:center;justify-content:center;padding:45px 3vw 45px 0}
+.pe-home .pe-hero-visual img{width:min(100%,780px);height:auto;max-height:680px;object-fit:contain;mix-blend-mode:multiply;transform:rotate(-5deg)}
+.pe-home .pe-image-label{position:absolute;top:30px;left:3%;right:7%;display:flex;justify-content:space-between;font-size:10px;letter-spacing:.12em;color:#52616d;z-index:1}
+.pe-home .pe-hero-foot{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:1px solid #d5dce3;padding:19px 6%;font-size:10px;letter-spacing:.08em;color:#52616d}
+.pe-home .pe-hero-foot a{font-size:11px;letter-spacing:0;color:#12161b}
+.pe-home .pe-hero-foot a span{margin-left:18px}
+.pe-home .pe-ticker{display:flex;align-items:center;background:#f5f9fd;border-bottom:1px solid #edf0f2}
+.pe-home .pe-ticker-window{flex:1;min-width:0;overflow:hidden}
+.pe-home .pe-ticker-track{display:flex;width:max-content}
+.pe-home .pe-ticker-group{display:flex;flex-shrink:0;align-items:center;justify-content:space-around;min-width:100vw;gap:32px;padding:20px 16px;font-size:11px;color:var(--pe-muted);white-space:nowrap}
+.pe-home .pe-ticker-group i{font-style:normal;font-size:17px;color:#397599}
+.pe-home .pe-ticker[data-motion] .pe-ticker-track{animation:pe-scroll 36s linear infinite}
+.pe-home .pe-ticker:hover .pe-ticker-track,.pe-home .pe-ticker:focus-within .pe-ticker-track,.pe-home .pe-ticker[data-paused] .pe-ticker-track{animation-play-state:paused}
+.pe-home .pe-pause{padding:18px 16px;border:0;border-left:1px solid var(--pe-line);background:transparent;font-size:11px;color:var(--pe-muted)}
+@keyframes pe-scroll{to{transform:translateX(-50%)}}
+.pe-home .pe-palette{padding-block:100px;scroll-margin-top:100px}
+.pe-home .pe-palette-heading{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:35px;margin-bottom:46px}
+.pe-home .pe-palette-heading p{margin:0}
+.pe-home .pe-palette-heading h2{font-size:clamp(44px,5.5vw,84px)}
+.pe-home figure{margin:0;min-width:0}
+.pe-home .pe-campaign img{width:100%;height:auto}
+.pe-home figcaption{display:flex;justify-content:space-between;gap:20px;padding-top:16px;font-size:10px;letter-spacing:.08em;color:var(--pe-muted);line-height:1.6}
+.pe-home .pe-colour-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;margin-top:45px}
+.pe-home .pe-colour-link{position:relative;display:block;padding:20px 0 35px;border-top:1px solid var(--pe-line)}
+.pe-home .pe-colour-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:27px;font-size:10px;letter-spacing:.1em;color:var(--pe-muted)}
+.pe-home .pe-swatch{display:block;width:26px;height:26px;border-radius:50%;background:var(--swatch);border:1px solid #cfd6d9;transition:transform .2s}
+.pe-home .pe-colour-link:hover .pe-swatch{transform:scale(1.18)}
+.pe-home .pe-colour-link h3{font-size:clamp(18px,2vw,26px)}
+.pe-home .pe-colour-link p{font-size:12px;margin:10px 0 0;padding-right:18px}
+.pe-home .pe-colour-stock{display:block;font-size:11px;line-height:1.6;font-weight:600;color:var(--pe-muted);margin-top:12px}
+.pe-home .pe-colour-arrow{position:absolute;bottom:8px;right:0}
+.pe-home .pe-palette-bottom{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:25px;padding-top:25px;border-top:1px solid var(--pe-line)}
+.pe-home .pe-palette-bottom p{margin:0;font-size:12px}
+.pe-home .pe-photo-placeholder{display:flex;min-height:320px;align-items:center;justify-content:center;flex-direction:column;gap:20px;background:#f2f4f5;color:var(--pe-muted);font-size:25px}
+.pe-home .pe-photo-placeholder small{font-size:12px}
+.pe-home .pe-blue-story{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:#eef1f0}
+.pe-home .pe-blue-story-photo{position:relative;aspect-ratio:1;min-width:0;overflow:hidden}
+.pe-home .pe-blue-story-photo img{width:100%;height:100%;object-fit:cover}
+.pe-home .pe-blue-story-photo>span{position:absolute;left:32px;bottom:28px;padding:12px 16px;background:#fff;font-size:10px;letter-spacing:.1em}
+.pe-home .pe-blue-story-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:60px 12%}
+.pe-home .pe-blue-story-copy p{max-width:360px;margin:28px 0 20px}
+.pe-home .pe-signature{margin-top:60px;font-size:10px;letter-spacing:.1em;color:var(--pe-muted)}
+.pe-home .pe-everyday{padding-top:110px;background:#f6f8f8;border-top:1px solid var(--pe-line);border-bottom:1px solid var(--pe-line)}
+.pe-home .pe-everyday-head{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:8%;padding-bottom:70px}
+.pe-home .pe-everyday-head h2{font-size:clamp(42px,5vw,74px)}
+.pe-home .pe-everyday-intro{max-width:440px;justify-self:end}
+.pe-home .pe-everyday-intro p{margin:0 0 24px}
+.pe-home .pe-everyday-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--pe-line)}
+.pe-home .pe-everyday-card{display:flex;flex-direction:column;justify-content:space-between;min-height:340px;padding:42px 6vw 48px;border-right:1px solid rgba(24,44,58,.12)}
+.pe-home .pe-everyday-card:last-child{border-right:0}
+.pe-home .pe-everyday-card>span{font-size:11px;font-weight:600;letter-spacing:.1em;color:#445867}
+.pe-home .pe-everyday-card h3{font-size:clamp(28px,3vw,44px)}
+.pe-home .pe-everyday-card p{max-width:310px;margin:16px 0 0;font-size:13px}
+.pe-home .pe-everyday-card--green{background:#dce5d6}
+.pe-home .pe-everyday-card--cream{background:#f4f1e9}
+.pe-home .pe-everyday-card--lavender{background:#e7e0ec}
+.pe-home .pe-everyday-foot{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:22px;font-size:10px;letter-spacing:.08em;color:var(--pe-muted)}
+.pe-home .pe-everyday-swatches{display:flex;gap:8px}
+.pe-home .pe-everyday-swatches i{display:block;width:10px;height:10px;border-radius:50%;border:1px solid #cbd1d2;background:#a3b393}
+.pe-home .pe-everyday-swatches i:nth-child(2){background:#252626}
+.pe-home .pe-everyday-swatches i:nth-child(3){background:#f4f2ec}
+.pe-home .pe-everyday-swatches i:nth-child(4){background:#bca9ce}
+.pe-home .pe-finish{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:7%;padding-top:0;padding-bottom:110px}
+.pe-home .pe-finish h2{font-size:clamp(36px,4vw,60px)}
+.pe-home .pe-finish-row{display:flex;align-items:center;gap:22px;border-top:1px solid var(--pe-line);padding:28px 0}
+.pe-home .pe-finish-row:last-child{border-bottom:1px solid var(--pe-line)}
+.pe-home .pe-finish-number{font-size:10px;color:var(--pe-muted)}
+.pe-home .pe-finish-row>div{flex:1;min-width:0}
+.pe-home .pe-finish-row h3{font-size:24px}
+.pe-home .pe-finish-row p{font-size:12px;margin:10px 0 0}
+.pe-home .pe-finish-tag{font-size:10px;letter-spacing:.08em;color:var(--pe-muted)}
+.pe-home .pe-newsletter{background:#f7faff;padding-block:92px}
+.pe-home .pe-news-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:10%}
+.pe-home .pe-newsletter h2{font-size:clamp(32px,3.4vw,48px)}
+.pe-home .pe-newsletter p{font-size:13px;margin:22px 0 0}
+.pe-home .pe-email-form{min-width:0}
+.pe-home .pe-email-form label{display:block;font-size:11px;margin-bottom:12px;color:var(--pe-muted)}
+.pe-home .pe-email-row{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--pe-ink);padding-bottom:12px}
+.pe-home .pe-email-row input{flex:1;min-width:0;width:100%;padding:10px 0;border:0;border-radius:0;background:transparent;font-size:16px;color:var(--pe-ink)}
+.pe-home .pe-email-row button{display:inline-flex;align-items:center;gap:15px;padding:10px 0;border:0;background:transparent;white-space:nowrap;font-size:12px;font-weight:600;color:var(--pe-ink)}
+.pe-home .pe-newsletter .pe-email-note{font-size:11px;margin-top:15px}
+.pe-home a:focus-visible,.pe-home button:focus-visible,.pe-home input:focus-visible{outline:2px solid #397599;outline-offset:5px}
+@media(max-width:1100px){.pe-home .pe-blue-story-copy{padding:45px 9%}.pe-home .pe-blue-story h2{font-size:clamp(34px,4.4vw,52px)}.pe-home .pe-signature{margin-top:35px}}
+@media(max-width:900px){.pe-home .pe-everyday{padding-top:75px}.pe-home .pe-everyday-head{grid-template-columns:1fr;gap:35px;padding-bottom:50px}.pe-home .pe-everyday-intro{justify-self:start}.pe-home .pe-everyday-grid{grid-template-columns:1fr}.pe-home .pe-everyday-card{min-height:260px;border-right:0;border-bottom:1px solid rgba(24,44,58,.12);padding:35px 6%}.pe-home .pe-everyday-card:last-child{border-bottom:0}.pe-home .pe-finish{grid-template-columns:1fr;gap:35px;padding-bottom:75px}}
+@media(max-width:760px){
+ .pe-home .pe-hero{grid-template-columns:1fr;min-height:0}
+ .pe-home .pe-hero-copy{padding:48px 6% 20px}
+ .pe-home .pe-hero h1{font-size:clamp(43px,10vw,72px)}
+ .pe-home .pe-hero-copy .pe-kicker{margin-bottom:22px}
+ .pe-home .pe-hero-copy p{margin:22px 0}
+ .pe-home .pe-hero-visual{min-height:330px;padding:35px 7% 30px}
+ .pe-home .pe-hero-visual img{max-height:420px;width:100%;transform:rotate(-5deg)}
+ .pe-home .pe-image-label{top:10px;left:7%;right:7%}
+ .pe-home .pe-hero-foot{padding:16px 6%}
+ .pe-home .pe-hero-foot>span{font-size:10px;max-width:170px;line-height:1.6}
+ .pe-home .pe-palette{padding-block:65px}
+ .pe-home .pe-palette-heading{grid-template-columns:1fr;gap:28px;margin-bottom:30px}
+ .pe-home .pe-palette-heading h2{font-size:clamp(44px,8vw,62px)}
+ .pe-home .pe-colour-links{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 26px;margin-top:30px}
+ .pe-home .pe-palette-bottom{align-items:flex-start;flex-direction:column}
+ .pe-home .pe-blue-story{grid-template-columns:1fr}
+ .pe-home .pe-blue-story-copy{padding:48px 6%}
+ .pe-home .pe-blue-story h2{font-size:clamp(36px,8vw,52px)}
+ .pe-home .pe-newsletter{padding-block:65px}
+ .pe-home .pe-news-inner{grid-template-columns:1fr;gap:35px}
+}
+@media(max-width:420px){.pe-home .pe-finish-row{gap:12px}.pe-home .pe-finish-tag{display:none}.pe-home .pe-finish-row h3{font-size:22px}.pe-home figcaption span:last-child{display:none}}
+@media(prefers-reduced-motion:reduce){.pe-home .pe-ticker[data-motion] .pe-ticker-track{animation:none}.pe-home .pe-pause{display:none}.pe-home .pe-button,.pe-home .pe-swatch{transition:none}}
+</style>
+
+<script>
+(() => {
+  const initialise = root => {
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = 'true';
+    const fit = () => {
+      const header = document.querySelector('.site-header');
+      const announcement = document.querySelector('.announcement,.announcement-bar');
+      const height = (header ? header.getBoundingClientRect().height : 0) + (announcement ? announcement.getBoundingClientRect().height : 0);
+      root.style.setProperty('--pe-top', height + 'px');
+    };
+    fit();
+    if ('ResizeObserver' in window) {
+      const observer = new ResizeObserver(fit);
+      const header = document.querySelector('.site-header');
+      const announcement = document.querySelector('.announcement,.announcement-bar');
+      if (header) observer.observe(header);
+      if (announcement) observer.observe(announcement);
+      document.addEventListener('shopify:section:unload', event => { if (event.target.contains(root)) observer.disconnect(); }, {once:true});
+    }
+    const ticker = root.querySelector('.pe-ticker');
+    const button = root.querySelector('.pe-pause');
+    button.hidden = false;
+    ticker.setAttribute('data-motion', '');
+    button.addEventListener('click', () => {
+      const paused = ticker.toggleAttribute('data-paused');
+      button.setAttribute('aria-pressed', String(paused));
+      button.setAttribute('aria-label', paused ? 'Resume scrolling text' : 'Pause scrolling text');
+      button.textContent = paused ? 'Play' : 'Pause';
+    });
+  };
+  initialise(document.getElementById('pe-{{ section.id }}'));
+  if (!window.podcoverEditorialReady) {
+    window.podcoverEditorialReady = true;
+    document.addEventListener('shopify:section:load', event => event.target.querySelectorAll('.pe-home').forEach(initialise));
+  }
+})();
+</script>
+{% schema %}
+{
+  "name": "PodCover editorial",
+  "settings": [
+    { "type": "product", "id": "featured_product", "label": "Blue Cloud product" },
+    { "type": "product", "id": "new_product", "label": "New colour case product" },
+    { "type": "image_picker", "id": "blue_hero_image", "label": "Blue Cloud hero (optional)" },
+    { "type": "image_picker", "id": "palette_image", "label": "Colour flat-lay photo" }
+  ],
+  "presets": [{ "name": "PodCover editorial" }]
+}
+{% endschema %}

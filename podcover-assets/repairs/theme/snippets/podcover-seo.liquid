@@ -1,0 +1,106 @@
+{% liquid
+  assign seo_title = page_title | default: shop.name
+  assign seo_description = page_description | strip_html | strip
+  case request.page_type
+    when 'index'
+      assign seo_title = 'PodCover | AirPods Cases for Your Everyday'
+      assign seo_description = 'Find your AirPods case in Blue Cloud, Matcha Green, Black, White or Lavender. Choose your model, find your colour and make the everyday feel like you.'
+    when 'page'
+      case page.handle
+        when 'about'
+          assign seo_title = 'About PodCover'
+          assign seo_description = 'Meet PodCover: Blue Cloud and the Colour Edit. AirPods cases made to add a little colour and character to your everyday essentials.'
+        when 'podcover-contact', 'contact'
+          assign seo_title = 'Contact PodCover'
+          assign seo_description = 'Need help with your PodCover order? Send your email, order number and message to our support team.'
+        when 'podcover-faq', 'faq'
+          assign seo_title = 'PodCover FAQ'
+          assign seo_description = 'Find answers about Blue Cloud, the Colour Edit, AirPods compatibility, colours, shipping and returns.'
+        when 'podcover-shipping', 'shipping'
+          assign seo_title = 'Shipping Information'
+          assign seo_description = 'Read about PodCover standard shipping, order processing, dispatch cutoffs and delivery options.'
+        when 'podcover-returns', 'returns'
+          assign seo_title = 'Returns Information'
+          assign seo_description = 'Arrange a PodCover return. Read the cancellation window, postage information and help for faulty or incorrect items.'
+        when 'refund-policy', 'podcover-refund-policy'
+          assign seo_title = 'Return and Refund Policy'
+          assign seo_description = 'Read the PodCover return and refund policy, including cancellation rights, item condition, postage and refunds.'
+        when 'terms', 'podcover-terms'
+          assign seo_title = 'Terms of Service'
+          assign seo_description = 'Read the terms for buying PodCover AirPods cases, including orders, payments, dispatch, cancellations and support.'
+        when 'best-sellers', 'bestsellers'
+          assign seo_title = 'PodCover Best Sellers'
+          assign seo_description = 'Explore the PodCover edits. Find your AirPods model and discover Blue Cloud and everyday colours.'
+      endcase
+      if seo_description == blank
+        assign seo_description = page.content | strip_html | strip | truncate: 155
+      endif
+    when 'product'
+      if seo_description == blank
+        assign seo_description = product.description | strip_html | strip | truncate: 155
+      endif
+    when 'collection'
+      if collection.handle == 'all'
+        assign seo_title = 'Shop AirPods Cases'
+      endif
+      if seo_description == blank
+        assign seo_description = collection.description | strip_html | strip | truncate: 155
+      endif
+    when 'list-collections'
+      assign seo_title = 'PodCover Collections'
+      assign seo_description = 'Discover the PodCover edits. Explore glossy Blue Cloud and the matte Colour Edit, and choose a case made for your AirPods model.'
+    when 'cart'
+      assign seo_title = 'Your Bag'
+      assign seo_description = 'Review your PodCover bag, update quantities and continue to secure Shopify checkout.'
+    when 'search'
+      assign seo_title = 'Search PodCover'
+      assign seo_description = 'Search PodCover for AirPods cases, models and everyday colours. View current product details and availability.'
+  endcase
+  if seo_description == blank
+    assign seo_description = 'Discover PodCover AirPods cases. Blue Cloud and everyday colours, with a fit made for your selected AirPods model.'
+  endif
+  assign seo_title_lower = seo_title | downcase
+  assign brand_lower = shop.name | downcase
+  assign share_image = page_image
+  if request.page_type == 'product'
+    assign share_image = product.featured_image | default: share_image
+  elsif request.page_type == 'collection'
+    assign share_image = collection.image | default: collection.products.first.featured_image | default: share_image
+  endif
+  assign share_image = share_image | default: settings.social_image
+  if share_image == blank
+    assign share_image = all_products['blue-cloud-airpods-case'].featured_image
+  endif
+  assign share_type = 'website'
+  if request.page_type == 'product'
+    assign share_type = 'product'
+  endif
+%}
+<link rel="canonical" href="{{ canonical_url }}">
+<title>{{ seo_title | escape }}{% unless seo_title_lower contains brand_lower %} — {{ shop.name | escape }}{% endunless %}{% if current_page > 1 %} — Page {{ current_page }}{% endif %}</title>
+<meta name="description" content="{{ seo_description | escape }}">
+<meta property="og:site_name" content="{{ shop.name | escape }}">
+<meta property="og:type" content="{{ share_type }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:title" content="{{ seo_title | escape }}">
+<meta property="og:description" content="{{ seo_description | escape }}">
+<meta name="twitter:card" content="{% if share_image != blank %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ seo_title | escape }}">
+<meta name="twitter:description" content="{{ seo_description | escape }}">
+{% if share_image != blank %}
+  {% liquid
+    assign share_image_url = share_image | image_url: width: 1200
+    unless share_image_url contains '://'
+      assign share_image_url = share_image_url | prepend: 'https:'
+    endunless
+  %}
+  <meta property="og:image" content="{{ share_image_url }}">
+  <meta property="og:image:width" content="{{ share_image.width | at_most: 1200 }}">
+  <meta property="og:image:alt" content="{{ share_image.alt | default: seo_title | escape }}">
+  <meta name="twitter:image" content="{{ share_image_url }}">
+  <meta name="twitter:image:alt" content="{{ share_image.alt | default: seo_title | escape }}">
+{% endif %}
+{% if request.page_type == 'index' %}
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":{{ shop.name | json }},"url":{{ shop.url | json }},"email":"podcoverhelp@gmail.com"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":{{ shop.name | json }},"url":{{ shop.url | json }}}</script>
+{% endif %}

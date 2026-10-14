@@ -1,0 +1,131 @@
+{% liquid
+  assign contact_url = pages['podcover-contact'].url
+  if contact_url == blank
+    assign contact_url = routes.root_url | append: 'pages/podcover-contact'
+  endif
+  assign checkout_unavailable = false
+  for item in cart.items
+    unless item.variant.available
+      assign checkout_unavailable = true
+    endunless
+  endfor
+%}
+<section class="v-checkout section-wrap" aria-labelledby="bag-heading">
+  <div class="v-checkout-top">
+    <div>
+      <span class="eyebrow">PODCOVER / THE FINAL TOUCH</span>
+      <h1 id="bag-heading">Your everyday, in the bag.</h1>
+      <p>Beautiful things, simply delivered. Review your bag before secure checkout.</p>
+    </div>
+    <a href="{{ routes.all_products_collection_url }}" class="v-continue">Continue shopping ↗</a>
+  </div>
+  {% if cart.item_count > 0 %}
+    <form action="{{ routes.cart_url }}" method="post" id="v-cart-form">
+      <div class="v-cart-grid">
+        <div class="v-cart-list">
+          {% for item in cart.items %}
+            {% liquid
+              assign item_max = item.variant.quantity_rule.max
+              if item.variant.inventory_management != blank and item.variant.inventory_policy == 'deny'
+                assign inventory_max = item.variant.inventory_quantity | at_least: 0
+                if item_max == blank or inventory_max < item_max
+                  assign item_max = inventory_max
+                endif
+              endif
+              assign item_image_alt = item.image.alt | default: item.product.title
+            %}
+            <article class="v-cart-product">
+              <a href="{{ item.url }}" class="v-cart-photo" aria-label="View {{ item.product.title | escape }}">
+                {% if item.image %}
+                  {{ item.image | image_url: width: 500 | image_tag: loading: 'lazy', widths: '160, 250, 500', sizes: '(min-width: 850px) 150px, 110px', alt: item_image_alt }}
+                {% else %}
+                  <span class="v-cart-photo-placeholder">PodCover</span>
+                {% endif %}
+              </a>
+              <div class="v-cart-info">
+                <div>
+                  <span class="eyebrow">{% if item.product.handle contains 'blue-cloud' %}THE BLUE CLOUD EDIT{% elsif item.product.handle contains 'colour' %}THE COLOUR EDIT{% else %}YOUR EVERYDAY EDIT{% endif %}</span>
+                  <a class="v-cart-name" href="{{ item.url }}">{{ item.product.title | escape }}</a>
+                  {% unless item.variant.title == 'Default Title' %}
+                    <p class="v-cart-variant">{{ item.variant.title | replace: '(only for the 2 pro)', '' | replace: '(only for 2 pro)', '' | strip | escape }}</p>
+                  {% endunless %}
+                  {% unless item.variant.available %}<p class="v-cart-stock">Out of stock. Remove this item to continue.</p>{% endunless %}
+                  {% if item.selling_plan_allocation %}<p class="v-cart-variant">{{ item.selling_plan_allocation.selling_plan.name | escape }}</p>{% endif %}
+                  {% for property in item.properties %}
+                    {% assign property_first_character = property.first | slice: 0 %}
+                    {% if property.last != blank and property_first_character != '_' %}
+                      <p class="v-cart-property">{{ property.first | escape }}: {{ property.last | escape }}</p>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                <div class="v-cart-bottom">
+                  <label class="v-qty-label" for="v-qty-{{ section.id }}-{{ forloop.index }}">Quantity</label>
+                  <input id="v-qty-{{ section.id }}-{{ forloop.index }}" type="number" min="0" step="1"{% if item_max != blank %} max="{{ item_max }}"{% endif %} name="updates[]" value="{{ item.quantity }}" inputmode="numeric" aria-label="Quantity for {{ item.product.title | escape }}">
+                  <a class="v-remove" href="{{ item.url_to_remove }}" aria-label="Remove {{ item.product.title | escape }} from your bag">Remove</a>
+                </div>
+              </div>
+              <div class="v-cart-prices">
+                {% if item.original_line_price > item.final_line_price %}<s>{{ item.original_line_price | money }}</s>{% endif %}
+                <strong class="v-line-price">{{ item.final_line_price | money }}</strong>
+                {% for discount in item.line_level_discount_allocations %}<span>{{ discount.discount_application.title | escape }} (−{{ discount.amount | money }})</span>{% endfor %}
+              </div>
+            </article>
+          {% endfor %}
+          <button type="submit" name="update" class="v-update">Update bag ↗</button>
+        </div>
+        <aside class="v-order-summary" aria-labelledby="summary-heading">
+          <span class="eyebrow">THE DETAILS</span>
+          <h2 id="summary-heading">The finishing touch.</h2>
+          <div class="v-summary-line">
+            <span>Subtotal ({{ cart.item_count }} {% if cart.item_count == 1 %}item{% else %}items{% endif %})</span>
+            <strong>{{ cart.items_subtotal_price | default: cart.total_price | money }}</strong>
+          </div>
+          {% for discount in cart.cart_level_discount_applications %}
+            <div class="v-summary-line"><span>{{ discount.title | escape }}</span><span>−{{ discount.total_allocated_amount | money }}</span></div>
+          {% endfor %}
+          <div class="v-summary-line"><span>Standard shipping</span><span>Free</span></div>
+          <div class="v-summary-line"><span>Taxes</span><span>{% if cart.taxes_included %}Included{% else %}Confirmed at checkout{% endif %}</span></div>
+          <div class="v-summary-total"><span>Estimated total</span><strong>{{ cart.total_price | money }}</strong></div>
+          <button type="submit" name="checkout" class="v-checkout-button" formnovalidate{% if checkout_unavailable %} disabled{% endif %}>
+            <span>{% if checkout_unavailable %}Remove out-of-stock items{% else %}Continue to secure checkout{% endif %}</span>
+            <span aria-hidden="true">→</span>
+          </button>
+          <div class="v-checkout-assurance"><span>✦ Thoughtful style</span><span>↗ Secure Shopify checkout</span></div>
+          <p class="v-secure-note">Available delivery methods and applicable taxes are confirmed during Shopify checkout.</p>
+          <div class="v-summary-help">
+            <details><summary>Need help?</summary><p>Include your email and order number on our <a href="{{ contact_url }}">contact page</a>, or email <a href="mailto:podcoverhelp@gmail.com">podcoverhelp@gmail.com</a>.</p></details>
+          </div>
+        </aside>
+      </div>
+    </form>
+  {% else %}
+    <div class="v-empty">
+      <div class="v-empty-mark" aria-hidden="true"><svg viewBox="0 0 100 100" fill="none"><rect x="15" y="35" width="70" height="50" rx="18" stroke="currentColor" stroke-width="2"/><path d="M15 49h70M35 35v-5a15 15 0 0 1 30 0v5" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="63" r="2.5" fill="currentColor"/></svg></div>
+      <div><h2>Your bag is looking a little empty.</h2><p>Find the case that makes your everyday essential feel like you.</p><a class="pill dark" href="{{ routes.all_products_collection_url }}">Explore the cases ↗</a></div>
+    </div>
+  {% endif %}
+</section>
+<style>
+  .v-checkout .v-checkout-top p,.v-checkout .v-cart-variant,.v-checkout .v-qty-label,.v-checkout .v-remove,.v-checkout .v-secure-note,.v-checkout .v-summary-help p,.v-checkout .v-empty p{color:#52616d;line-height:1.7}
+  .v-checkout .v-cart-grid{grid-template-columns:minmax(0,1.4fr) minmax(300px,.85fr);gap:clamp(25px,4vw,65px)}
+  .v-checkout .v-cart-list,.v-checkout .v-cart-info{min-width:0}
+  .v-checkout .v-cart-product{grid-template-columns:140px minmax(0,1fr) auto;gap:20px}
+  .v-checkout .v-cart-photo img{width:100%;height:100%;object-fit:contain}
+  .v-checkout .v-cart-photo-placeholder{padding:14px;text-align:center;width:100%;font-size:14px;font-weight:600;letter-spacing:.08em}
+  .v-checkout .v-cart-name{font-size:22px;line-height:1.25;overflow-wrap:anywhere}
+  .v-checkout .v-cart-info .eyebrow{font-size:10px;color:#52616d;margin-bottom:12px;line-height:1.6}
+  .v-checkout .v-cart-prices{display:flex;flex-direction:column;align-items:flex-end;gap:8px;font-size:13px;line-height:1.5}
+  .v-checkout .v-cart-prices s{color:#52616d}
+  .v-checkout .v-cart-stock{font-size:13px;line-height:1.6;color:#9e3329}
+  .v-checkout .v-cart-property{font-size:13px;line-height:1.6;color:#52616d}
+  .v-checkout .v-update{margin-top:24px;min-height:44px}
+  .v-checkout .v-checkout-button:disabled{background:#dbe1e5;color:#3b4d5b;border-color:#dbe1e5;box-shadow:none;cursor:not-allowed}
+  .v-checkout .v-summary-help a{text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+  .v-checkout .v-empty-mark{display:flex;justify-content:center;align-items:center;min-height:230px;color:#536c7f}
+  .v-checkout .v-empty-mark svg{width:min(65%,220px);height:auto}
+  @media(max-width:950px){.v-checkout .v-cart-grid{grid-template-columns:1fr}.v-checkout .v-order-summary{position:static}.v-checkout .v-cart-product{grid-template-columns:120px minmax(0,1fr) auto}}
+  @media(max-width:600px){.v-checkout .v-cart-product{grid-template-columns:90px minmax(0,1fr);gap:14px}.v-checkout .v-cart-prices{grid-column:2;align-items:flex-start}.v-checkout .v-cart-name{font-size:19px}.v-checkout .v-cart-bottom{gap:10px}.v-checkout .v-cart-info .eyebrow{font-size:10px}.v-checkout .v-empty-mark{min-height:180px}}
+</style>
+{% schema %}
+{"name":"Cart page","settings":[]}
+{% endschema %}

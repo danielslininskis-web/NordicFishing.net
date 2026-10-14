@@ -4,6 +4,9 @@
     assign blue = all_products['blue-cloud-airpods-case']
   endif
   assign colours = section.settings.new_product
+  if colours == blank
+    assign colours = all_products['podcover-colour-edit-airpods-case']
+  endif
   assign blue_url = blue.url | default: routes.all_products_collection_url
   assign colours_url = colours.url | default: routes.all_products_collection_url
   assign newsletter_id = 'PodCoverList-' | append: section.id
@@ -16,7 +19,8 @@
       <span class="pe-kicker">PODCOVER / THE BLUE CLOUD EDIT</span>
       <h1 id="pe-title-{{ section.id }}">Your AirPods.<br><span>Your Style.</span></h1>
       <p>A glossy blue finish. A little silver shine. Make your everyday essential unmistakably yours.</p>
-      <a class="pe-button" href="{{ routes.all_products_collection_url }}">Shop Collection {{ arrow }}</a>
+      {% if blue != blank %}<p class="pe-stock{% unless blue.available %} pe-stock--out{% endunless %}">{% if blue.available %}Blue Cloud · In stock{% else %}Blue Cloud · Out of stock{% endif %}</p>{% endif %}
+      <a class="pe-button" href="{{ routes.all_products_collection_url }}">{% if blue.available or colours.available %}Shop Collection{% else %}Explore Collection{% endif %} {{ arrow }}</a>
     </div>
     <div class="pe-hero-visual">
       <div class="pe-image-label"><span>BLUE CLOUD</span><span>DROP 001</span></div>
@@ -42,9 +46,9 @@
     </div>
     <figure class="pe-campaign">
       {% if section.settings.palette_image != blank %}
-        {{ section.settings.palette_image | image_url: width: 2000 | image_tag: widths: '600, 1000, 1500, 2000', sizes: '88vw', loading: 'lazy', alt: 'Matcha green, black, white and lavender cases arranged on ivory fabric' }}
+        {{ section.settings.palette_image | image_url: width: 2000, format: 'pjpg' | image_tag: widths: '480, 750, 1100, 1500, 2000', sizes: '(min-width: 1440px) 1268px, 88vw', loading: 'lazy', alt: 'Matcha green, black, white and lavender cases arranged on ivory fabric' }}
       {% elsif colours.featured_image != blank %}
-        {{ colours.featured_image | image_url: width: 1600 | image_tag: loading: 'lazy', alt: colours.title }}
+        {{ colours.featured_image | image_url: width: 2000, format: 'pjpg' | image_tag: widths: '480, 750, 1100, 1500, 2000', sizes: '(min-width: 1440px) 1268px, 88vw', loading: 'lazy', alt: colours.title }}
       {% else %}
         <div class="pe-photo-placeholder">The colour edit<br><small>Matcha green · Black · White · Lavender</small></div>
       {% endif %}
@@ -60,24 +64,35 @@
           assign colour_index = forloop.index0
           assign colour_key = colour_keys[colour_index]
           assign colour_url = colours_url
+          assign colour_variant = nil
           if colours != blank
             for variant in colours.variants
               assign variant_name = variant.title | downcase
               if variant_name contains colour_key
-                assign colour_url = variant.url
-                break
+                if colour_variant == nil
+                  assign colour_variant = variant
+                endif
+                if variant.available
+                  assign colour_variant = variant
+                  break
+                endif
               endif
             endfor
+            if colour_variant != nil
+              assign colour_url = colours.url | append: '?variant=' | append: colour_variant.id
+            endif
           endif
         %}
         <a class="pe-colour-link" href="{{ colour_url }}">
           <span class="pe-colour-top"><span>0{{ forloop.index }}</span><span class="pe-swatch" style="--swatch:{{ colour_hex[colour_index] }}" aria-hidden="true"></span></span>
-          <h3>{{ colour_name }}</h3><p>{{ colour_notes[colour_index] }}</p><span class="pe-colour-arrow">{{ arrow }}</span>
+          <h3>{{ colour_name }}</h3><p>{{ colour_notes[colour_index] }}</p>
+          {% if colour_variant != nil %}<span class="pe-colour-stock">{% if colour_variant.available %}In stock{% else %}Out of stock{% endif %}</span>{% endif %}
+          <span class="pe-colour-arrow">{{ arrow }}</span>
         </a>
       {% endfor %}
     </div>
     <div class="pe-palette-bottom">
-      <p>{% if colours != blank %}{{ colours.title | escape }}{% if colours.price_varies %} · From{% else %} ·{% endif %} {{ colours.price | money }}{% unless colours.available %} · Sold out{% endunless %}{% else %}Find your shade. Choose your AirPods model on the product page.{% endif %}</p>
+      <p>{% if colours != blank %}{{ colours.title | escape }}{% if colours.price_varies %} · From{% else %} ·{% endif %} {{ colours.price | money }}<br><span class="pe-stock{% unless colours.available %} pe-stock--out{% endunless %}">{% if colours.available %}In stock{% else %}Out of stock{% endif %}</span>{% else %}Find your shade. Choose your AirPods model on the product page.{% endif %}</p>
       <a class="pe-text-link" href="{{ colours_url }}">Explore the colour edit {{ arrow }}</a>
     </div>
   </section>
@@ -91,7 +106,7 @@
       <span class="pe-kicker">SMALL DETAIL. BIG FEELING.</span>
       <h2 id="pe-story-title-{{ section.id }}">Your essentials.<br>A little more <em>you.</em></h2>
       <p>For coffee runs, long playlists, and everything in between. A pop of blue that feels right at home in your daily rotation.</p>
-      <a class="pe-text-link" href="{{ blue_url }}">Make it yours {{ arrow }}</a>
+      <a class="pe-text-link" href="{{ blue_url }}">{% if blue.available %}Make it yours{% else %}Explore Blue Cloud{% endif %} {{ arrow }}</a>
       <span class="pe-signature">PODCOVER / MADE TO EXPRESS YOU</span>
     </div>
   </section>
@@ -104,7 +119,7 @@
       </div>
       <div class="pe-everyday-intro">
         <p>A little colour, a useful clip, and the right fit for your AirPods. Everything you need, without overthinking it.</p>
-        <a class="pe-text-link" href="{{ colours_url }}">Shop the colour edit {{ arrow }}</a>
+        <a class="pe-text-link" href="{{ colours_url }}">Explore the colour edit {{ arrow }}</a>
       </div>
     </div>
 
@@ -132,8 +147,8 @@
   <section class="pe-finish pe-wrap" aria-labelledby="pe-finish-title-{{ section.id }}">
     <div><span class="pe-kicker">FIND YOUR FINISH</span><h2 id="pe-finish-title-{{ section.id }}">Two moods.<br>Same <em>you.</em></h2></div>
     <div class="pe-finish-links">
-      <a class="pe-finish-row" href="{{ blue_url }}"><span class="pe-finish-number">01</span><div><h3>Blue Cloud</h3><p>Glossy blue. Silver chain. A little extra shine.</p></div><span class="pe-finish-tag">GLOSSY</span>{{ arrow }}</a>
-      <a class="pe-finish-row" href="{{ colours_url }}"><span class="pe-finish-number">02</span><div><h3>The colour edit</h3><p>Matcha, black, white, or lavender. Keep it understated.</p></div><span class="pe-finish-tag">MATTE</span>{{ arrow }}</a>
+      <a class="pe-finish-row" href="{{ blue_url }}"><span class="pe-finish-number">01</span><div><h3>Blue Cloud</h3><p>Glossy blue. Silver chain. A little extra shine.</p>{% if blue != blank %}<span class="pe-colour-stock">{% if blue.available %}In stock{% else %}Out of stock{% endif %}</span>{% endif %}</div><span class="pe-finish-tag">GLOSSY</span>{{ arrow }}</a>
+      <a class="pe-finish-row" href="{{ colours_url }}"><span class="pe-finish-number">02</span><div><h3>The colour edit</h3><p>Matcha, black, white, or lavender. Keep it understated.</p>{% if colours != blank %}<span class="pe-colour-stock">{% if colours.available %}In stock{% else %}Out of stock{% endif %}</span>{% endif %}</div><span class="pe-finish-tag">MATTE</span>{{ arrow }}</a>
     </div>
   </section>
 
@@ -177,11 +192,16 @@
 .pe-home .pe-hero h1{font-size:clamp(48px,6.6vw,106px);line-height:1.02;letter-spacing:-.065em;color:#12161b}
 .pe-home .pe-hero h1 span{color:#62666b}
 .pe-home .pe-hero-copy p{max-width:350px;margin:30px 0;color:#61676d;font-size:14px;line-height:1.8}
-.pe-home .pe-hero-copy .pe-kicker{color:#737980;font-size:9px;margin-bottom:36px}
+.pe-home .pe-hero-copy .pe-kicker{color:#52616d;font-size:11px;margin-bottom:36px}
+.pe-home .pe-stock{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;line-height:1.6;color:#355544}
+.pe-home .pe-stock::before{content:'';width:6px;height:6px;flex-shrink:0;border-radius:50%;background:currentColor}
+.pe-home .pe-stock--out{color:#526575}
+.pe-home .pe-hero-copy .pe-stock{margin:-12px 0 22px;font-size:12px;color:#355544}
+.pe-home .pe-hero-copy .pe-stock--out{color:#526575}
 .pe-home .pe-hero-visual{position:relative;min-width:0;display:flex;align-items:center;justify-content:center;padding:45px 3vw 45px 0}
 .pe-home .pe-hero-visual img{width:min(100%,780px);height:auto;max-height:680px;object-fit:contain;mix-blend-mode:multiply;transform:rotate(-5deg)}
-.pe-home .pe-image-label{position:absolute;top:30px;left:3%;right:7%;display:flex;justify-content:space-between;font-size:8px;letter-spacing:.14em;color:#62666b;z-index:1}
-.pe-home .pe-hero-foot{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:1px solid #d5dce3;padding:19px 6%;font-size:8px;letter-spacing:.1em;color:#737980}
+.pe-home .pe-image-label{position:absolute;top:30px;left:3%;right:7%;display:flex;justify-content:space-between;font-size:10px;letter-spacing:.12em;color:#52616d;z-index:1}
+.pe-home .pe-hero-foot{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:1px solid #d5dce3;padding:19px 6%;font-size:10px;letter-spacing:.08em;color:#52616d}
 .pe-home .pe-hero-foot a{font-size:11px;letter-spacing:0;color:#12161b}
 .pe-home .pe-hero-foot a span{margin-left:18px}
 .pe-home .pe-ticker{display:flex;align-items:center;background:#f5f9fd;border-bottom:1px solid #edf0f2}
@@ -199,7 +219,7 @@
 .pe-home .pe-palette-heading h2{font-size:clamp(44px,5.5vw,84px)}
 .pe-home figure{margin:0;min-width:0}
 .pe-home .pe-campaign img{width:100%;height:auto}
-.pe-home figcaption{display:flex;justify-content:space-between;gap:20px;padding-top:16px;font-size:8px;letter-spacing:.12em;color:var(--pe-muted);line-height:1.6}
+.pe-home figcaption{display:flex;justify-content:space-between;gap:20px;padding-top:16px;font-size:10px;letter-spacing:.08em;color:var(--pe-muted);line-height:1.6}
 .pe-home .pe-colour-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;margin-top:45px}
 .pe-home .pe-colour-link{position:relative;display:block;padding:20px 0 35px;border-top:1px solid var(--pe-line)}
 .pe-home .pe-colour-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:27px;font-size:10px;letter-spacing:.1em;color:var(--pe-muted)}
@@ -207,6 +227,7 @@
 .pe-home .pe-colour-link:hover .pe-swatch{transform:scale(1.18)}
 .pe-home .pe-colour-link h3{font-size:clamp(18px,2vw,26px)}
 .pe-home .pe-colour-link p{font-size:12px;margin:10px 0 0;padding-right:18px}
+.pe-home .pe-colour-stock{display:block;font-size:11px;line-height:1.6;font-weight:600;color:var(--pe-muted);margin-top:12px}
 .pe-home .pe-colour-arrow{position:absolute;bottom:8px;right:0}
 .pe-home .pe-palette-bottom{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:25px;padding-top:25px;border-top:1px solid var(--pe-line)}
 .pe-home .pe-palette-bottom p{margin:0;font-size:12px}
@@ -215,10 +236,10 @@
 .pe-home .pe-blue-story{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:#eef1f0}
 .pe-home .pe-blue-story-photo{position:relative;aspect-ratio:1;min-width:0;overflow:hidden}
 .pe-home .pe-blue-story-photo img{width:100%;height:100%;object-fit:cover}
-.pe-home .pe-blue-story-photo>span{position:absolute;left:32px;bottom:28px;padding:12px 16px;background:#fff;font-size:9px;letter-spacing:.12em}
+.pe-home .pe-blue-story-photo>span{position:absolute;left:32px;bottom:28px;padding:12px 16px;background:#fff;font-size:10px;letter-spacing:.1em}
 .pe-home .pe-blue-story-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:60px 12%}
 .pe-home .pe-blue-story-copy p{max-width:360px;margin:28px 0 20px}
-.pe-home .pe-signature{margin-top:60px;font-size:9px;letter-spacing:.15em;color:var(--pe-muted)}
+.pe-home .pe-signature{margin-top:60px;font-size:10px;letter-spacing:.1em;color:var(--pe-muted)}
 .pe-home .pe-everyday{padding-top:110px;background:#f6f8f8;border-top:1px solid var(--pe-line);border-bottom:1px solid var(--pe-line)}
 .pe-home .pe-everyday-head{display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:8%;padding-bottom:70px}
 .pe-home .pe-everyday-head h2{font-size:clamp(42px,5vw,74px)}
@@ -227,13 +248,13 @@
 .pe-home .pe-everyday-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--pe-line)}
 .pe-home .pe-everyday-card{display:flex;flex-direction:column;justify-content:space-between;min-height:340px;padding:42px 6vw 48px;border-right:1px solid rgba(24,44,58,.12)}
 .pe-home .pe-everyday-card:last-child{border-right:0}
-.pe-home .pe-everyday-card>span{font-size:9px;font-weight:600;letter-spacing:.16em;color:var(--pe-muted)}
+.pe-home .pe-everyday-card>span{font-size:11px;font-weight:600;letter-spacing:.1em;color:#445867}
 .pe-home .pe-everyday-card h3{font-size:clamp(28px,3vw,44px)}
 .pe-home .pe-everyday-card p{max-width:310px;margin:16px 0 0;font-size:13px}
 .pe-home .pe-everyday-card--green{background:#dce5d6}
 .pe-home .pe-everyday-card--cream{background:#f4f1e9}
 .pe-home .pe-everyday-card--lavender{background:#e7e0ec}
-.pe-home .pe-everyday-foot{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:22px;font-size:9px;letter-spacing:.13em;color:var(--pe-muted)}
+.pe-home .pe-everyday-foot{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:22px;font-size:10px;letter-spacing:.08em;color:var(--pe-muted)}
 .pe-home .pe-everyday-swatches{display:flex;gap:8px}
 .pe-home .pe-everyday-swatches i{display:block;width:10px;height:10px;border-radius:50%;border:1px solid #cbd1d2;background:#a3b393}
 .pe-home .pe-everyday-swatches i:nth-child(2){background:#252626}
@@ -247,7 +268,7 @@
 .pe-home .pe-finish-row>div{flex:1;min-width:0}
 .pe-home .pe-finish-row h3{font-size:24px}
 .pe-home .pe-finish-row p{font-size:12px;margin:10px 0 0}
-.pe-home .pe-finish-tag{font-size:8px;letter-spacing:.12em;color:var(--pe-muted)}
+.pe-home .pe-finish-tag{font-size:10px;letter-spacing:.08em;color:var(--pe-muted)}
 .pe-home .pe-newsletter{background:#f7faff;padding-block:92px}
 .pe-home .pe-news-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:10%}
 .pe-home .pe-newsletter h2{font-size:clamp(32px,3.4vw,48px)}
@@ -257,7 +278,7 @@
 .pe-home .pe-email-row{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--pe-ink);padding-bottom:12px}
 .pe-home .pe-email-row input{flex:1;min-width:0;width:100%;padding:10px 0;border:0;border-radius:0;background:transparent;font-size:16px;color:var(--pe-ink)}
 .pe-home .pe-email-row button{display:inline-flex;align-items:center;gap:15px;padding:10px 0;border:0;background:transparent;white-space:nowrap;font-size:12px;font-weight:600;color:var(--pe-ink)}
-.pe-home .pe-newsletter .pe-email-note{font-size:10px;margin-top:15px}
+.pe-home .pe-newsletter .pe-email-note{font-size:11px;margin-top:15px}
 .pe-home a:focus-visible,.pe-home button:focus-visible,.pe-home input:focus-visible{outline:2px solid #397599;outline-offset:5px}
 @media(max-width:1100px){.pe-home .pe-blue-story-copy{padding:45px 9%}.pe-home .pe-blue-story h2{font-size:clamp(34px,4.4vw,52px)}.pe-home .pe-signature{margin-top:35px}}
 @media(max-width:900px){.pe-home .pe-everyday{padding-top:75px}.pe-home .pe-everyday-head{grid-template-columns:1fr;gap:35px;padding-bottom:50px}.pe-home .pe-everyday-intro{justify-self:start}.pe-home .pe-everyday-grid{grid-template-columns:1fr}.pe-home .pe-everyday-card{min-height:260px;border-right:0;border-bottom:1px solid rgba(24,44,58,.12);padding:35px 6%}.pe-home .pe-everyday-card:last-child{border-bottom:0}.pe-home .pe-finish{grid-template-columns:1fr;gap:35px;padding-bottom:75px}}
@@ -271,7 +292,7 @@
  .pe-home .pe-hero-visual img{max-height:420px;width:100%;transform:rotate(-5deg)}
  .pe-home .pe-image-label{top:10px;left:7%;right:7%}
  .pe-home .pe-hero-foot{padding:16px 6%}
- .pe-home .pe-hero-foot>span{font-size:7px;max-width:140px;line-height:1.6}
+ .pe-home .pe-hero-foot>span{font-size:10px;max-width:170px;line-height:1.6}
  .pe-home .pe-palette{padding-block:65px}
  .pe-home .pe-palette-heading{grid-template-columns:1fr;gap:28px;margin-bottom:30px}
  .pe-home .pe-palette-heading h2{font-size:clamp(44px,8vw,62px)}

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f8fc">
+    {% render 'podcover-seo' %}
+    {% if settings.favicon != blank %}
+      <link rel="icon" type="image/png" sizes="96x96" href="{{ settings.favicon | image_url: width: 96, height: 96, crop: 'center' }}">
+      <link rel="apple-touch-icon" sizes="180x180" href="{{ settings.favicon | image_url: width: 180, height: 180, crop: 'center' }}">
+    {% else %}
+      <link rel="icon" type="image/png" sizes="96x96" href="{{ 'podcover-favicon-96.png' | asset_url }}">
+      <link rel="apple-touch-icon" sizes="180x180" href="{{ 'podcover-touch-icon-180.png' | asset_url }}">
+    {% endif %}
+    {{ content_for_header }}
+    {{ 'vyqeli.css' | asset_url | stylesheet_tag }}
+    {{ 'podcover-repairs.css' | asset_url | stylesheet_tag }}
+    <script>
+      window.PodCoverRoutes = {
+        root: {{ routes.root_url | json }},
+        cart: {{ routes.cart_url | json }},
+        cart_add: {{ routes.cart_add_url | json }},
+        cart_change: {{ routes.cart_change_url | json }},
+        all_products: {{ routes.all_products_collection_url | json }}
+      };
+    </script>
+    <script src="{{ 'vyqeli.js' | asset_url }}" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    {% section 'announcement' %}
+    {% section 'header' %}
+    <main id="main" tabindex="-1">{{ content_for_layout }}</main>
+    {% section 'footer' %}
+    <div class="drawer-backdrop" data-close-cart hidden></div>
+    <aside class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-heading" aria-hidden="true" tabindex="-1" hidden inert>
+      <div class="drawer-top"><h2 id="cart-drawer-heading">Your bag <span data-cart-count></span></h2><button type="button" class="icon-btn" data-close-cart aria-label="Close bag">✕</button></div>
+      <div data-cart-content><p>Loading your bag…</p></div>
+      <p class="drawer-status" data-cart-status role="status" aria-live="polite"></p>
+    </aside>
+  </body>
+</html>

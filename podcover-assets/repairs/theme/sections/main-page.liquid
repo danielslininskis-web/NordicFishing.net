@@ -1,0 +1,11 @@
+<section class="section-wrap standard-page">
+  <span class="eyebrow">PODCOVER / INFORMATION</span>
+  <h1>{{ page.title | escape }}</h1>
+  <div class="rte">
+    {% if page.handle == 'contact' and page.content == blank %}
+      <p>Need help with your order? Use our contact form to send your email, order number and message.</p>
+      <a class="pill dark" href="{{ pages['podcover-contact'].url | default: '/pages/podcover-contact' }}">Contact PodCover <span aria-hidden="true">↗</span></a>
+    {% else %}{{ page.content }}{% endif %}
+  </div>
+</section>
+{% schema %}{"name":"Page","settings":[]}{% endschema %}

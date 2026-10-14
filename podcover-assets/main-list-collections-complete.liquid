@@ -1,3 +1,11 @@
+{% liquid
+  assign directory_count = 0
+  for listed_collection in collections
+    unless listed_collection.handle == 'frontpage'
+      assign directory_count = directory_count | plus: 1
+    endunless
+  endfor
+%}
 <section class="pclist" id="pclist-{{ section.id }}">
   <header class="pclist-hero">
     <span>{{ section.settings.eyebrow | escape }}</span>
@@ -8,6 +16,8 @@
     <a href="{{ routes.all_products_collection_url }}">Shop every case <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></a>
   </header>
 
+  {% if directory_count > 0 %}
+  {% paginate collections by section.settings.collections_per_page %}
   <div class="pclist-grid">
     {% assign visible_collection_number = 0 %}
     {% for listed_collection in collections %}
@@ -16,10 +26,11 @@
           assign visible_collection_number = visible_collection_number | plus: 1
           assign collection_image = listed_collection.image | default: listed_collection.products.first.featured_image
           assign collection_alt = collection_image.alt | default: listed_collection.title
+          assign card_number = paginate.current_offset | default: 0 | plus: visible_collection_number
         %}
         <article class="pclist-card pclist-reveal">
           <a class="pclist-visual" href="{{ listed_collection.url }}" aria-label="View {{ listed_collection.title | escape }}">
-            <span>0{{ visible_collection_number }}</span>
+            <span>{% if card_number < 10 %}0{% endif %}{{ card_number }}</span>
             {% if collection_image %}
               {{ collection_image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '400, 600, 900, 1200, 1400', sizes: '(min-width: 900px) 46vw, 92vw', alt: collection_alt }}
             {% else %}
@@ -48,11 +59,62 @@
     {% endfor %}
     {% if visible_collection_number == 0 %}
       <div class="pclist-empty">
-        <h2>The next edit is taking shape.</h2>
-        <p>Check back soon for the newest PodCover collection.</p>
+        <h2>No collections on this page.</h2>
+        <p>Use the page links below to explore the other collections.</p>
       </div>
     {% endif %}
   </div>
+  {% if paginate.pages > 1 %}
+    <nav class="pclist-pagination" aria-label="Collection directory pages">{{ paginate | default_pagination }}</nav>
+  {% endif %}
+  {% endpaginate %}
+  {% else %}
+    <div class="pclist-grid">
+      {% liquid
+        assign product_handles = 'blue-cloud-airpods-case,podcover-colour-edit-airpods-case' | split: ','
+        assign range_number = 0
+      %}
+      {% for product_handle in product_handles %}
+        {% assign range_product = all_products[product_handle] %}
+        {% if range_product != blank %}
+          {% liquid
+            assign range_number = range_number | plus: 1
+            assign range_image = range_product.featured_image
+            assign range_alt = range_image.alt | default: range_product.title
+          %}
+          <article class="pclist-card pclist-reveal">
+            <a class="pclist-visual" href="{{ range_product.url }}" aria-label="View {{ range_product.title | escape }}">
+              <span>{% if range_number < 10 %}0{% endif %}{{ range_number }}</span>
+              {% unless range_product.available %}<strong class="pclist-availability">Out of stock</strong>{% endunless %}
+              {% if range_image %}
+                {{ range_image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '400, 600, 900, 1200, 1400', sizes: '(min-width: 900px) 46vw, 92vw', alt: range_alt }}
+              {% else %}
+                <div class="pclist-placeholder" aria-hidden="true"><svg viewBox="0 0 280 220" fill="none"><rect x="61" y="71" width="158" height="107" rx="39"/><path d="M72 81c4-30 24-45 68-45s64 15 68 45M61 111h158"/><circle cx="140" cy="144" r="4"/></svg></div>
+              {% endif %}
+            </a>
+            <div class="pclist-card-copy">
+              <div>
+                <span>PODCOVER / PRODUCT EDIT</span>
+                <h2><a href="{{ range_product.url }}">{% if product_handle == 'blue-cloud-airpods-case' %}Blue Cloud{% else %}The Colour Edit{% endif %}</a></h2>
+                <p>{% if product_handle == 'blue-cloud-airpods-case' %}Cloudlike blue, a glossy finish and a little silver shine.{% else %}Black, white, matcha green and lavender. Find the shade and fit for your everyday.{% endif %}</p>
+              </div>
+              <a class="pclist-open" href="{{ range_product.url }}" aria-label="Open {{ range_product.title | escape }}">
+                <small>{% if range_product.price_varies %}From {% endif %}{{ range_product.price | money }}</small>
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg>
+              </a>
+            </div>
+          </article>
+        {% endif %}
+      {% endfor %}
+      {% if range_number == 0 %}
+        <div class="pclist-empty">
+          <h2>Explore every case.</h2>
+          <p>Browse all available PodCover products in our shop.</p>
+          <a href="{{ routes.all_products_collection_url }}">Shop all cases ↗</a>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
 
   <section class="pclist-manifesto" aria-labelledby="pclist-manifesto-{{ section.id }}">
     <span>MADE FOR THE EVERYDAY</span>
@@ -66,6 +128,7 @@
 
 <style>
   .pclist{--pclist-ink:#182c3a;--pclist-muted:#657681;--pclist-line:#dce3e7;--pclist-paper:#f5f8fc;color:var(--pclist-ink);background:#fff;overflow:hidden}.pclist *{box-sizing:border-box}.pclist a{color:inherit;text-decoration:none}.pclist svg{stroke:currentColor;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round}.pclist-hero{min-height:470px;padding:clamp(65px,8vw,120px) max(5vw,calc((100vw - 1440px)/2 + 72px));display:grid;grid-template-columns:170px minmax(0,1fr) auto;align-items:end;gap:45px;background:var(--pclist-paper);border-top:1px solid var(--pclist-line);border-bottom:1px solid var(--pclist-line)}.pclist-hero>span,.pclist-card-copy>div>span,.pclist-manifesto>span{align-self:start;font-size:9px;font-weight:700;letter-spacing:.19em;line-height:1.5}.pclist-hero h1{margin:0 0 20px;font-size:clamp(60px,8vw,118px);font-weight:560;letter-spacing:-.075em;line-height:.9}.pclist-hero p{max-width:540px;margin:0;color:var(--pclist-muted);font-size:14px;line-height:1.75}.pclist-hero>a{display:flex;align-items:center;gap:35px;padding-bottom:8px;border-bottom:1px solid;font-size:11px;font-weight:700;white-space:nowrap}.pclist-hero>a svg{width:18px;height:18px}.pclist-grid{max-width:1296px;margin:0 auto;padding:80px 0 115px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:80px 22px}.pclist-card{min-width:0}.pclist-visual{position:relative;display:grid;place-items:center;aspect-ratio:1.22;overflow:hidden;border-radius:19px;background:#f1f3f2}.pclist-visual>span{position:absolute;z-index:2;left:16px;top:16px;padding:8px 11px;border-radius:999px;background:#ffffffd9;backdrop-filter:blur(8px);font-size:8px;letter-spacing:.13em}.pclist-visual img{width:100%;height:100%;object-fit:contain;transition:transform .7s cubic-bezier(.2,.75,.2,1)}.pclist-visual:hover img{transform:scale(1.025)}.pclist-placeholder{width:65%;color:#98a7ad}.pclist-placeholder svg{width:100%;stroke-width:2}.pclist-card-copy{padding:22px 3px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:25px;align-items:end}.pclist-card-copy>div>span{color:#778893;font-size:8px}.pclist-card-copy h2{margin:8px 0 10px;font-family:inherit;font-size:clamp(26px,3vw,39px);font-weight:600;letter-spacing:-.055em;line-height:1.08}.pclist-card-copy p,.pclist-card-copy>div>div{max-width:480px;margin:0;color:var(--pclist-muted);font-size:11px;line-height:1.7}.pclist-open{display:flex;align-items:center;gap:10px}.pclist-open small{color:var(--pclist-muted);font-size:9px;white-space:nowrap}.pclist-open svg{width:42px;height:42px;padding:12px;border:1px solid var(--pclist-line);border-radius:50%;transition:background .2s,color .2s,transform .2s}.pclist-open:hover svg{background:var(--pclist-ink);color:#fff;transform:translateY(-2px)}.pclist-empty{grid-column:1/-1;padding:70px 0}.pclist-empty h2{font-size:clamp(38px,5vw,70px);letter-spacing:-.06em}.pclist-empty p{color:var(--pclist-muted)}.pclist-manifesto{max-width:1440px;margin:0 auto 110px;padding:80px 72px;display:grid;grid-template-columns:170px minmax(0,1fr) minmax(250px,.6fr);gap:45px;align-items:start;background:var(--pclist-ink);color:#fff;border-radius:22px}.pclist-manifesto h2{margin:0;font-size:clamp(45px,5.5vw,80px);font-weight:540;letter-spacing:-.07em;line-height:.98}.pclist-manifesto h2 em{font-family:Georgia,serif;font-weight:400;color:#9fc8dc}.pclist-manifesto>div{align-self:end}.pclist-manifesto p{margin:0 0 30px;color:#b8c2c7;font-size:12px;line-height:1.75}.pclist-manifesto a{display:flex;justify-content:space-between;gap:25px;padding-bottom:8px;border-bottom:1px solid #ffffff80;font-size:11px;font-weight:700}.pclist.is-motion .pclist-reveal{opacity:0;transform:translateY(18px)}.pclist.is-motion .pclist-reveal.is-visible{opacity:1;transform:none;transition:opacity .55s ease,transform .55s ease}.pclist.is-motion .pclist-reveal:nth-child(2n){transition-delay:.08s}
+  .pclist{--pclist-muted:#53636e}.pclist-hero>span,.pclist-card-copy>div>span,.pclist-manifesto>span,.pclist-visual>span{font-size:11px}.pclist-card-copy>div>span{color:#53636e}.pclist-card-copy p,.pclist-card-copy>div>div,.pclist-open small{font-size:12px}.pclist-availability{position:absolute;z-index:2;right:16px;top:16px;padding:8px 11px;background:#202321;color:white;border-radius:999px;font-size:11px;line-height:1.5}.pclist-pagination{max-width:1296px;margin:-65px auto 80px;display:flex;justify-content:center;flex-wrap:wrap;gap:7px}.pclist-pagination .page,.pclist-pagination .next,.pclist-pagination .prev{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:42px;padding:7px 11px;border:1px solid var(--pclist-line);border-radius:8px;font-size:12px}.pclist-pagination .current{background:var(--pclist-ink);color:white}.pclist a:focus-visible{outline:2px solid #477a99;outline-offset:4px}
   @media(max-width:1500px){.pclist-grid{margin-left:5%;margin-right:5%}.pclist-manifesto{margin-left:5%;margin-right:5%}}
   @media(max-width:900px){.pclist-hero{grid-template-columns:1fr;gap:25px;min-height:0}.pclist-hero>span{align-self:auto}.pclist-hero>a{justify-self:start}.pclist-grid{grid-template-columns:1fr;gap:65px}.pclist-manifesto{grid-template-columns:1fr;gap:28px;padding:55px}.pclist-manifesto>div{max-width:520px}}
   @media(max-width:620px){.pclist-hero{padding:58px 5% 50px}.pclist-hero h1{font-size:clamp(55px,18vw,76px)}.pclist-grid{padding-top:48px;padding-bottom:75px;gap:52px}.pclist-visual{aspect-ratio:1.08;border-radius:15px}.pclist-card-copy{grid-template-columns:1fr;gap:18px}.pclist-card-copy h2{font-size:29px}.pclist-open{justify-content:space-between}.pclist-manifesto{margin-bottom:70px;padding:42px 25px;border-radius:16px}.pclist-manifesto h2{font-size:45px}}
@@ -97,7 +160,8 @@
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "PODCOVER / FIND YOUR EDIT" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Collections" },
-    { "type": "textarea", "id": "intro", "label": "Introduction", "default": "Different moods, the same everyday essential. Explore every PodCover edit and find the one that feels like yours." }
+    { "type": "textarea", "id": "intro", "label": "Introduction", "default": "Different moods, the same everyday essential. Explore every PodCover edit and find the one that feels like yours." },
+    { "type": "range", "id": "collections_per_page", "label": "Collections per page", "min": 4, "max": 24, "step": 4, "default": 12 }
   ]
 }
 {% endschema %}

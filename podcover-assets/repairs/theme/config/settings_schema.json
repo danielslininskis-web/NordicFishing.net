@@ -1,0 +1,8 @@
+[
+  {"name":"theme_info","theme_name":"PodCover Editorial","theme_author":"PodCover","theme_version":"1.1.0","theme_documentation_url":"https://help.shopify.com/en/manual/online-store/themes","theme_support_url":"https://help.shopify.com/"},
+  {"name":"Brand","settings":[
+    {"type":"color","id":"accent","label":"Accent color","default":"#6dbce9"},
+    {"type":"image_picker","id":"favicon","label":"Favicon override","info":"Optional. The theme requests a small 96px icon automatically. Leave blank to use the optimized PodCover logo asset."},
+    {"type":"image_picker","id":"social_image","label":"Social sharing image","info":"Optional fallback for link previews. Products always use their own product image when available."}
+  ]}
+]

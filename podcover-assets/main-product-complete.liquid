@@ -18,13 +18,6 @@
   if selected_variant.compare_at_price > selected_variant.price
     assign saving_percent = selected_variant.compare_at_price | minus: selected_variant.price | times: 100 | divided_by: selected_variant.compare_at_price | floor
   endif
-  assign selected_maximum = selected_variant.quantity_rule.max
-  if selected_variant.inventory_management != blank and selected_variant.inventory_policy == 'deny'
-    assign selected_inventory = selected_variant.inventory_quantity | at_least: 0
-    if selected_maximum == blank or selected_inventory < selected_maximum
-      assign selected_maximum = selected_inventory
-    endif
-  endif
 %}
 
 <section id="PodCoverProduct-{{ section.id }}" class="pc-product" data-pc-product style="--pc-stage: {{ section.settings.image_background | default: '#f3f0e8' }};" aria-labelledby="pc-title-{{ section.id }}">
@@ -64,7 +57,7 @@
       </div>
 
       <div class="pc-purchase">
-        <div class="pc-intro-line"><span class="pc-eyebrow">PODCOVER / MADE TO EXPRESS YOU</span>{% if section.settings.show_free_shipping %}<span class="pc-shipping-tag"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 5h11v12H3zM14 9h4l3 4v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>Free shipping</span>{% endif %}</div>
+        <div class="pc-intro-line"><span class="pc-eyebrow">PODCOVER / MADE TO EXPRESS YOU</span>{% if section.settings.show_free_shipping %}<span class="pc-shipping-tag"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 5h11v12H3zM14 9h4l3 4v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>Free standard shipping</span>{% endif %}</div>
         {% if section.settings.show_reviews and rating != blank and rating_count > 0 %}
           {% assign star_width = rating.rating | times: 100.0 | divided_by: rating.scale_max %}
           <div class="pc-rating" aria-label="Rated {{ rating.rating }} out of {{ rating.scale_max }}, based on {{ rating_count }} reviews"><span class="pc-stars" aria-hidden="true"><span>★★★★★</span><span style="width: {{ star_width }}%;">★★★★★</span></span><strong>{{ rating.rating }}/{{ rating.scale_max }}</strong><span>{{ rating_count }} {% if rating_count == 1 %}review{% else %}reviews{% endif %}</span></div>
@@ -80,7 +73,7 @@
         </div>
 
         {% form 'product', product, id: form_id, class: 'pc-product-form' %}
-          <div class="pc-native-option"><label for="pc-variant-{{ section.id }}">{% if product.has_only_default_variant %}Product{% else %}Choose your model and colour{% endif %}</label><select name="id" id="pc-variant-{{ section.id }}" data-pc-variant required>{% for variant in product.variants %}<option value="{{ variant.id }}"{% if variant.id == selected_variant.id %} selected{% endif %}>{% for variant_option in variant.options %}{{ variant_option | replace: '(only for 2 pro)', '' | replace: '(only for the 2 pro)', '' | strip | escape }}{% unless forloop.last %} / {% endunless %}{% endfor %} — {{ variant.price | money }}{% unless variant.available %} — Sold out{% endunless %}</option>{% endfor %}</select></div>
+          <div class="pc-native-option"><label for="pc-variant-{{ section.id }}">{% if product.has_only_default_variant %}Product{% else %}Choose your model and colour{% endif %}</label><select name="id" id="pc-variant-{{ section.id }}" data-pc-variant required>{% if selected_variant.available == false and product.available %}<option value="" selected disabled>Choose an in-stock option</option>{% endif %}{% for variant in product.variants %}<option value="{{ variant.id }}"{% if variant.id == selected_variant.id and variant.available %} selected{% endif %}{% unless variant.available %} disabled{% endunless %}>{% for variant_option in variant.options %}{{ variant_option | replace: '(only for 2 pro)', '' | replace: '(only for the 2 pro)', '' | strip | escape }}{% unless forloop.last %} / {% endunless %}{% endfor %} — {{ variant.price | money }}{% unless variant.available %} — Sold out{% endunless %}</option>{% endfor %}</select></div>
           {% unless product.has_only_default_variant %}
             <div class="pc-enhanced-options" hidden>
               {% for option in product.options_with_values %}
@@ -121,9 +114,10 @@
               {% endfor %}
             </div>
           {% endunless %}
-          <div class="pc-quantity-line"><label for="pc-quantity-{{ section.id }}">Quantity</label><div class="pc-quantity"><button type="button" data-pc-minus aria-label="Decrease quantity">−</button><input id="pc-quantity-{{ section.id }}" type="number" name="quantity" value="{{ selected_variant.quantity_rule.min | default: 1 }}" min="{{ selected_variant.quantity_rule.min | default: 1 }}" step="{{ selected_variant.quantity_rule.increment | default: 1 }}"{% if selected_maximum != blank %} max="{{ selected_maximum }}"{% endif %} inputmode="numeric" required><button type="button" data-pc-plus aria-label="Increase quantity">+</button></div><span class="pc-stock" data-pc-stock role="status"><span aria-hidden="true"></span>{% if selected_variant.available %}In stock{% else %}Sold out{% endif %}</span></div>
+          <div class="pc-quantity-line"><label for="pc-quantity-{{ section.id }}">Quantity</label><div class="pc-quantity"><button type="button" data-pc-minus aria-label="Decrease quantity">−</button><input id="pc-quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1" step="1" inputmode="numeric" required><button type="button" data-pc-plus aria-label="Increase quantity">+</button></div><span class="pc-stock" data-pc-stock role="status"><span aria-hidden="true"></span>{% if selected_variant.available %}In stock{% else %}Sold out{% endif %}</span></div>
+          <noscript><p class="pc-fit-note">Choose an in-stock option before adding to your bag. Shopify checks the selected option's availability and quantity rules when you add it.</p></noscript>
           {% if section.settings.show_dispatch_countdown %}
-            <div class="pc-dispatch" data-pc-dispatch data-cutoff-hour="{{ section.settings.dispatch_cutoff_hour }}" hidden>
+            <div class="pc-dispatch" data-pc-dispatch data-cutoff-hour="{{ section.settings.dispatch_cutoff_hour | default: 15 }}" hidden>
               <span class="pc-dispatch-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v5l3 2M9 3h6"/></svg></span>
               <p><span data-pc-dispatch-lead>Order within</span> <strong data-pc-dispatch-time>--:--:--</strong> <span data-pc-dispatch-result>and we'll dispatch it today.</span></p>
             </div>
@@ -158,6 +152,7 @@
       "fallbackImageId": {{ product.featured_image.id | append: '' | json }},
       "addUrl": {{ routes.cart_add_url | append: '.js' | json }},
       "cartUrl": {{ routes.cart_url | json }},
+      "dispatchBlockedDates": {{ section.settings.dispatch_blocked_dates | default: '' | json }},
       "variants": [
         {% for variant in product.variants %}
           {% liquid
@@ -173,7 +168,7 @@
               assign variant_saving = variant.compare_at_price | minus: variant.price | times: 100 | divided_by: variant.compare_at_price | floor
             endif
           %}
-          {"id": {{ variant.id | append: '' | json }}, "options": {{ variant.options | json }}, "available": {{ variant.available | json }}, "price": {{ variant.price | money | json }}, "compare": {% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price | money | json }}{% else %}null{% endif %}, "saving": {{ variant_saving | json }}, "imageId": {% if variant.featured_image %}{{ variant.featured_image.id | append: '' | json }}{% else %}null{% endif %}, "min": {{ variant.quantity_rule.min | default: 1 | json }}, "step": {{ variant.quantity_rule.increment | default: 1 | json }}, "max": {% if maximum_quantity != blank %}{{ maximum_quantity | json }}{% else %}null{% endif %}}{% unless forloop.last %},{% endunless %}
+          {"id": {{ variant.id | append: '' | json }}, "options": {{ variant.options | json }}, "available": {{ variant.available | json }}, "inStock": {% if variant.inventory_management != blank and variant.inventory_quantity <= 0 %}false{% else %}true{% endif %}, "price": {{ variant.price | money | json }}, "compare": {% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price | money | json }}{% else %}null{% endif %}, "saving": {{ variant_saving | json }}, "imageId": {% if variant.featured_image %}{{ variant.featured_image.id | append: '' | json }}{% else %}null{% endif %}, "min": {{ variant.quantity_rule.min | default: 1 | json }}, "step": {{ variant.quantity_rule.increment | default: 1 | json }}, "max": {% if maximum_quantity != blank %}{{ maximum_quantity | json }}{% else %}null{% endif %}}{% unless forloop.last %},{% endunless %}
         {% endfor %}
       ],
       "images": [
@@ -186,7 +181,7 @@
 </section>
 
 <style>
-  .pc-product{--pc-ink:#202321;--pc-muted:#71756f;--pc-line:#e3e5de;--pc-green:#6b7d61;color:var(--pc-ink);background:#fff;font-family:Manrope,'DM Sans',Arial,sans-serif}
+  .pc-product{--pc-ink:#202321;--pc-muted:#62685e;--pc-line:#e3e5de;--pc-green:#6b7d61;color:var(--pc-ink);background:#fff;font-family:Manrope,'DM Sans',Arial,sans-serif}
   .pc-product *,.pc-product *::before,.pc-product *::after{box-sizing:border-box}
   .pc-product [hidden]{display:none!important}
   .pc-product a{color:inherit;text-decoration:none}
@@ -201,34 +196,34 @@
   .pc-gallery{min-width:0;position:sticky;top:104px}.pc-gallery-top{display:grid;grid-template-columns:minmax(0,1fr) 105px;gap:10px}
   .pc-photo{background:var(--pc-stage);aspect-ratio:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:22px}
   .pc-main-image{display:block;max-width:100%;width:100%;height:100%;object-fit:contain;object-position:center}
-  .pc-photo-label{position:absolute;z-index:1;left:15px;top:15px;max-width:calc(100% - 30px);padding:8px 11px;background:#fffdf8ed;border:1px solid #fff6;border-radius:8px;font-size:9px;font-weight:700;letter-spacing:.12em;line-height:1.5}
+  .pc-photo-label{position:absolute;z-index:1;left:15px;top:15px;max-width:calc(100% - 30px);padding:8px 11px;background:#fffdf8ed;border:1px solid #fff6;border-radius:8px;font-size:10px;font-weight:700;letter-spacing:.12em;line-height:1.5}
   .pc-photo-index{position:absolute;right:15px;bottom:14px;padding:6px 9px;border-radius:20px;background:#ffffffc9;font-size:10px;letter-spacing:.05em}
   .pc-photo-empty{padding:35px 20px;display:grid;justify-items:center;gap:15px;color:var(--pc-muted);font-size:12px;text-align:center}.pc-photo-empty svg{width:50px;height:50px}
   .pc-benefit-rail{display:grid;grid-template-rows:repeat(3,minmax(0,1fr));gap:10px;min-width:0}
   .pc-rail-card{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:13px;padding:14px 8px;background:var(--pc-stage);border-radius:17px;text-align:center}.pc-rail-card:nth-child(2){background:#eef0e9}.pc-rail-card:nth-child(3){background:#f0edf3}.pc-rail-card svg{width:35px;height:35px;stroke-width:1.9}.pc-rail-card span{font-size:11px;font-weight:650;line-height:1.45}
-  .pc-thumbnails{display:flex;gap:9px;overflow:auto;padding:13px 2px 4px;scrollbar-width:thin}.pc-thumbnail{flex:0 0 64px;width:64px;height:64px;background:#f5f4ef;border:1px solid var(--pc-line);padding:3px;border-radius:11px;transition:border-color .2s}.pc-thumbnail.is-active{border-color:var(--pc-ink);box-shadow:inset 0 0 0 1px var(--pc-ink)}.pc-thumbnail img{display:block;width:100%;height:100%;object-fit:contain;border-radius:7px}.pc-gallery-note{font-size:9px;letter-spacing:.14em;color:var(--pc-muted);padding-top:16px;line-height:1.6}
-  .pc-purchase{min-width:0;padding-top:2px}.pc-intro-line{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}.pc-eyebrow{font-size:9px;font-weight:700;letter-spacing:.13em;line-height:1.6}
+  .pc-thumbnails{display:flex;gap:9px;overflow:auto;padding:13px 2px 4px;scrollbar-width:thin}.pc-thumbnail{flex:0 0 64px;width:64px;height:64px;background:#f5f4ef;border:1px solid var(--pc-line);padding:3px;border-radius:11px;transition:border-color .2s}.pc-thumbnail.is-active{border-color:var(--pc-ink);box-shadow:inset 0 0 0 1px var(--pc-ink)}.pc-thumbnail img{display:block;width:100%;height:100%;object-fit:contain;border-radius:7px}.pc-gallery-note{font-size:10px;letter-spacing:.14em;color:var(--pc-muted);padding-top:16px;line-height:1.6}
+  .pc-purchase{min-width:0;padding-top:2px}.pc-intro-line{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}.pc-eyebrow{font-size:10px;font-weight:700;letter-spacing:.13em;line-height:1.6}
   .pc-shipping-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;background:#eef2eb;color:#526449;border-radius:20px;font-size:10px;font-weight:650;white-space:nowrap}.pc-shipping-tag svg{width:16px;height:16px}
   .pc-rating{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;color:var(--pc-muted)}.pc-rating strong{color:var(--pc-ink)}.pc-stars{position:relative;font-size:16px;letter-spacing:1px;color:#dcded7}.pc-stars>span:nth-child(2){position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#718562}
   .pc-purchase h1{font-size:clamp(29px,3.25vw,43px);font-weight:700;letter-spacing:-.055em;line-height:1.1;overflow-wrap:anywhere;margin:0 0 12px}.pc-subtitle{font-size:13px;line-height:1.7;color:var(--pc-muted);max-width:390px}
-  .pc-price-row{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:20px 0}.pc-price-row>strong{font-size:25px;font-weight:750;letter-spacing:-.04em}.pc-price-row>s{font-size:15px;color:#82857e}.pc-sale{padding:6px 10px;background:var(--pc-ink);color:#fff;border-radius:20px;font-size:11px;font-weight:650}
+  .pc-price-row{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:20px 0}.pc-price-row>strong{font-size:25px;font-weight:750;letter-spacing:-.04em}.pc-price-row>s{font-size:15px;color:#676b63}.pc-sale{padding:6px 10px;background:var(--pc-ink);color:#fff;border-radius:20px;font-size:11px;font-weight:650}
   .pc-feature-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 10px;padding:0 0 22px;margin-bottom:22px;border-bottom:1px solid var(--pc-line)}.pc-feature-grid>div{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.5;font-weight:600;min-width:0}.pc-feature-icon{display:flex;justify-content:center;align-items:center;background:#f0efe9;border-radius:50%;width:30px;height:30px;flex-shrink:0}.pc-feature-icon svg{width:18px;height:18px}
   .pc-option-group+.pc-option-group{margin-top:18px}.pc-option-heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;font-size:11px;line-height:1.5}.pc-option-heading>span:first-child{font-weight:750}.pc-option-heading>span:last-child{color:var(--pc-muted);text-align:right}.pc-option-values{display:flex;flex-wrap:wrap;gap:8px}
-  .pc-option{display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--pc-line);background:#fff;padding:11px 12px;border-radius:10px;color:var(--pc-ink);font-size:11px;min-height:43px;line-height:1.4;transition:background .15s,border-color .15s}.pc-option.is-active{border-color:var(--pc-ink);box-shadow:inset 0 0 0 1px var(--pc-ink);background:#f7f7f3}.pc-option.is-unavailable>span:last-child{text-decoration:line-through;text-decoration-color:#9a9c96;color:#8a8d87}.pc-option:hover{border-color:#94988b}.pc-colour-values .pc-option{flex:1 1 100px}.pc-swatch{width:17px;height:17px;flex-shrink:0;border-radius:50%;border:1px solid #0000001c}
+  .pc-option{display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--pc-line);background:#fff;padding:11px 12px;border-radius:10px;color:var(--pc-ink);font-size:11px;min-height:43px;line-height:1.4;transition:background .15s,border-color .15s}.pc-option.is-active{border-color:var(--pc-ink);box-shadow:inset 0 0 0 1px var(--pc-ink);background:#f7f7f3}.pc-option.is-unavailable>span:last-child{text-decoration:line-through;text-decoration-color:#777e70;color:#5e6657}.pc-option:hover{border-color:#94988b}.pc-colour-values .pc-option{flex:1 1 100px}.pc-swatch{width:17px;height:17px;flex-shrink:0;border-radius:50%;border:1px solid #0000001c}
   .pc-native-option label{display:block;margin-bottom:8px;font-size:12px;font-weight:650}.pc-native-option select{width:100%;max-width:100%;min-height:46px;padding:10px;border:1px solid var(--pc-line);border-radius:9px;background:white;font-size:13px;color:var(--pc-ink)}.pc-product.pc-enhanced .pc-native-option{display:none}
   .pc-quantity-line{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}.pc-quantity-line>label{font-size:11px;font-weight:700;margin-right:auto}.pc-quantity{display:flex;align-items:center;overflow:hidden;min-height:40px;border:1px solid var(--pc-line);border-radius:9px}.pc-quantity>button{display:none;border:0;background:white;color:var(--pc-ink);width:34px;min-height:40px;font-size:19px}.pc-enhanced .pc-quantity>button{display:block}.pc-quantity input{width:44px;min-height:40px;border:0;padding:0;text-align:center;appearance:textfield;background:#fff;font-size:13px;color:var(--pc-ink)}.pc-quantity input::-webkit-inner-spin-button,.pc-quantity input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-  .pc-stock{display:flex;align-items:center;gap:6px;font-size:10px;color:#526449;line-height:1.5}.pc-stock>span{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}.pc-stock.is-unavailable{color:#8a685b}.pc-fit-note{font-size:10px;line-height:1.6;color:var(--pc-muted);padding:12px 0 16px}
-  .pc-dispatch{display:flex;align-items:center;gap:10px;margin-top:14px;padding:11px 13px;border:1px solid #dfe7d9;border-radius:11px;background:#f3f6ef;color:#40513a}.pc-dispatch-icon{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;border-radius:50%;background:#dfe9d8}.pc-dispatch-icon svg{width:17px;height:17px}.pc-dispatch p{font-size:10px;line-height:1.55}.pc-dispatch strong{display:inline-block;padding:2px 6px;border-radius:5px;background:#202321;color:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.025em}.pc-dispatch.is-next{background:#f6f4ef;border-color:#e7e1d6;color:#69665d}.pc-dispatch.is-next .pc-dispatch-icon{background:#ebe5da}
-  .pc-add{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:59px;padding:17px 20px;background:var(--pc-ink);border:1px solid var(--pc-ink);border-radius:13px;color:#fff;font-size:13px;font-weight:750;box-shadow:0 7px 18px #20232112;transition:background .2s,transform .2s}.pc-add>svg{width:20px;height:20px;transition:transform .2s}.pc-add:hover:not(:disabled){background:#394136;transform:translateY(-1px)}.pc-add:hover:not(:disabled)>svg{transform:translateX(3px)}.pc-add:disabled{background:#8b8e85;border-color:#8b8e85;box-shadow:none}.pc-add-prices{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end;line-height:1.5}.pc-add-prices s{font-size:11px;color:#ffffffa6;font-weight:500}
+  .pc-stock{display:none;align-items:center;gap:6px;font-size:10px;color:#526449;line-height:1.5}.pc-stock>span{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}.pc-stock.is-unavailable{color:#795847}.pc-enhanced .pc-stock{display:flex}.pc-fit-note{font-size:10px;line-height:1.6;color:var(--pc-muted);padding:12px 0 16px}
+  .pc-dispatch{display:flex;align-items:center;gap:10px;margin-top:14px;padding:11px 13px;border:1px solid #dfe7d9;border-radius:11px;background:#f3f6ef;color:#40513a}.pc-dispatch-icon{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;border-radius:50%;background:#dfe9d8}.pc-dispatch-icon svg{width:17px;height:17px}.pc-dispatch p{font-size:11px;line-height:1.55}.pc-dispatch strong{display:inline-block;padding:2px 6px;border-radius:5px;background:#202321;color:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;letter-spacing:.025em}.pc-dispatch.is-next{background:#f6f4ef;border-color:#e7e1d6;color:#69665d}.pc-dispatch.is-next .pc-dispatch-icon{background:#ebe5da}
+  .pc-add{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:59px;padding:17px 20px;background:var(--pc-ink);border:1px solid var(--pc-ink);border-radius:13px;color:#fff;font-size:13px;font-weight:750;box-shadow:0 7px 18px #20232112;transition:background .2s,transform .2s}.pc-add>svg{width:20px;height:20px;transition:transform .2s}.pc-add:hover:not(:disabled){background:#394136;transform:translateY(-1px)}.pc-add:hover:not(:disabled)>svg{transform:translateX(3px)}.pc-add:disabled{background:#686e62;border-color:#686e62;box-shadow:none}.pc-add-prices{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end;line-height:1.5}.pc-add-prices s{font-size:11px;color:#ffffffa6;font-weight:500}
   .pc-form-result{padding:13px 14px;margin-top:12px;border:1px solid var(--pc-line);background:#f5f7f1;border-radius:9px;font-size:12px;line-height:1.6;overflow-wrap:anywhere}.pc-form-result.is-error{background:#fff6f2;border-color:#e9c6b7;color:#974826}.pc-form-result a{display:inline-block;margin-top:6px;text-decoration:underline;text-underline-offset:3px;font-weight:700}
   .pc-assurance{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:7px;padding:17px 0 22px;font-size:10px;color:#6b7265;line-height:1.5}.pc-assurance svg{width:17px;height:17px}.pc-assurance a{text-decoration:underline;text-underline-offset:3px}
   .pc-trustpilot{display:flex;align-items:center;gap:10px;width:100%;margin:0 0 20px;padding:12px 14px;border:1px solid var(--pc-line);border-radius:12px;background:#fff;box-shadow:0 7px 22px #2023210c;font-size:11px;line-height:1.45;transition:transform .2s,border-color .2s}.pc-trustpilot:hover{transform:translateY(-1px);border-color:#bcc4b7}.pc-trustpilot-brand{display:flex;align-items:center;gap:5px;white-space:nowrap}.pc-trustpilot-brand>span{display:grid;place-items:center;width:21px;height:21px;border-radius:5px;background:#00b67a;color:#fff;font-size:14px}.pc-trustpilot-brand strong{font-size:12px}.pc-trustpilot-copy{margin-left:auto;color:var(--pc-muted);text-align:right}.pc-trustpilot>svg{width:16px;height:16px}
   .pc-accordions{border-top:1px solid var(--pc-line)}.pc-accordions details{border-bottom:1px solid var(--pc-line)}.pc-accordions summary{display:flex;justify-content:space-between;align-items:center;gap:15px;list-style:none;cursor:pointer;padding:17px 0;font-size:12px;font-weight:700;line-height:1.5}.pc-accordions summary::-webkit-details-marker{display:none}.pc-accordions summary>span{font-size:20px;font-weight:400}.pc-accordions details[open] summary>span{transform:rotate(45deg)}
   .pc-detail-copy{font-size:12px;line-height:1.8;color:var(--pc-muted);padding-bottom:18px;overflow-wrap:anywhere}.pc-detail-copy p+p{margin-top:10px}.pc-detail-copy a{text-decoration:underline;text-underline-offset:3px}.pc-detail-copy img{max-width:100%;height:auto}.pc-detail-copy ul,.pc-detail-copy ol{padding-left:20px}.pc-detail-copy table{display:block;max-width:100%;overflow:auto}.pc-detail-copy h2,.pc-detail-copy h3{font-size:16px;letter-spacing:-.025em;line-height:1.5;margin:12px 0;color:var(--pc-ink)}.pc-help{padding-top:16px;font-size:11px;color:var(--pc-muted);line-height:1.7}.pc-help a{display:inline-flex;align-items:center;gap:5px;color:var(--pc-ink);font-weight:650}.pc-help svg{width:13px;height:13px}
-  .pc-everyday{margin-top:80px;padding:35px;background:#f4f3ee;border-radius:22px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr);gap:25px 35px;align-items:start}.pc-everyday h2{font-size:clamp(26px,3vw,38px);font-weight:600;line-height:1.12;letter-spacing:-.055em;padding-top:12px}.pc-everyday h2 em{font-family:Georgia,serif;font-weight:400;color:var(--pc-green)}.pc-everyday-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;padding-top:5px}.pc-everyday-steps>div>span{font-size:10px;color:#8c9584;display:block;margin-bottom:17px}.pc-everyday-steps strong{display:block;font-size:13px;font-weight:650;line-height:1.5;margin-bottom:7px}.pc-everyday-steps p{font-size:11px;line-height:1.7;color:var(--pc-muted)}.pc-collection-link{font-size:11px;font-weight:650;display:inline-flex;justify-content:space-between;gap:28px;align-items:center;justify-self:start;border-bottom:1px solid #6b7265;padding-bottom:7px;line-height:1.5}.pc-collection-link>svg{width:17px;height:17px}
+  .pc-everyday{margin-top:80px;padding:35px;background:#f4f3ee;border-radius:22px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr);gap:25px 35px;align-items:start}.pc-everyday h2{font-size:clamp(26px,3vw,38px);font-weight:600;line-height:1.12;letter-spacing:-.055em;padding-top:12px}.pc-everyday h2 em{font-family:Georgia,serif;font-weight:400;color:var(--pc-green)}.pc-everyday-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;padding-top:5px}.pc-everyday-steps>div>span{font-size:10px;color:#5c6953;display:block;margin-bottom:17px}.pc-everyday-steps strong{display:block;font-size:13px;font-weight:650;line-height:1.5;margin-bottom:7px}.pc-everyday-steps p{font-size:11px;line-height:1.7;color:var(--pc-muted)}.pc-collection-link{font-size:11px;font-weight:650;display:inline-flex;justify-content:space-between;gap:28px;align-items:center;justify-self:start;border-bottom:1px solid #6b7265;padding-bottom:7px;line-height:1.5}.pc-collection-link>svg{width:17px;height:17px}
   @media(max-width:999px){.pc-layout{grid-template-columns:1fr;gap:24px;max-width:660px;margin:auto}.pc-gallery{position:static}.pc-gallery-top{grid-template-columns:minmax(0,1fr) 120px}.pc-purchase{padding:0}.pc-purchase h1{font-size:36px}.pc-everyday{grid-template-columns:1fr}.pc-everyday-steps{max-width:620px}}
-  @media(max-width:760px){.pc-wrap{padding:0 5% 40px}.pc-breadcrumb{font-size:10px;padding:15px 0 17px;gap:6px}.pc-breadcrumb>span:last-child{display:none}.pc-breadcrumb>span:nth-last-child(2){display:none}.pc-layout{gap:19px}.pc-gallery-top{grid-template-columns:minmax(0,1fr) 86px;gap:8px}.pc-photo{border-radius:16px;min-height:245px;aspect-ratio:1}.pc-photo-label{font-size:8px;left:10px;top:10px;padding:6px 8px}.pc-photo-index{font-size:9px;right:10px;bottom:10px}.pc-benefit-rail{gap:7px}.pc-rail-card{padding:9px 4px;gap:7px;border-radius:12px}.pc-rail-card svg{width:28px;height:28px}.pc-rail-card span{font-size:9px;line-height:1.35}.pc-thumbnails{gap:7px;padding-top:10px}.pc-thumbnail{flex-basis:54px;width:54px;height:54px;border-radius:9px}.pc-gallery-note{display:none}.pc-intro-line{margin-bottom:10px;gap:8px}.pc-eyebrow{font-size:8px}.pc-shipping-tag{font-size:9px;padding:5px 7px}.pc-shipping-tag svg{width:14px;height:14px}.pc-purchase h1{font-size:29px;line-height:1.08;margin-bottom:10px}.pc-subtitle{font-size:12px;line-height:1.65}.pc-price-row{margin:15px 0}.pc-price-row>strong{font-size:23px}.pc-feature-grid{margin-bottom:17px;padding-bottom:17px;gap:10px}.pc-feature-grid>div{font-size:10px;gap:6px}.pc-feature-icon{width:27px;height:27px}.pc-feature-icon svg{width:16px;height:16px}.pc-option{font-size:10px;padding:10px;min-height:42px}.pc-colour-values .pc-option{flex-basis:calc(50% - 8px)}.pc-option-group+.pc-option-group{margin-top:15px}.pc-quantity-line{margin-top:17px;gap:10px}.pc-dispatch{padding:10px 11px}.pc-dispatch p{font-size:9px}.pc-fit-note{font-size:10px}.pc-add{min-height:56px;padding:15px 16px;font-size:12px;border-radius:12px}.pc-assurance{font-size:9px;padding:15px 0 20px}.pc-trustpilot{padding:11px 12px;gap:8px;font-size:9px}.pc-trustpilot-brand strong{font-size:11px}.pc-trustpilot-brand>span{width:19px;height:19px;font-size:13px}.pc-trustpilot>svg{width:14px;height:14px}.pc-everyday{margin-top:40px;padding:25px 21px;border-radius:16px;gap:25px}.pc-everyday h2{font-size:31px}.pc-everyday-steps{grid-template-columns:1fr;gap:17px}.pc-everyday-steps>div{position:relative;padding-left:30px}.pc-everyday-steps>div>span{position:absolute;left:0;top:3px;margin:0}.pc-everyday-steps strong{margin-bottom:4px}}
-  @media(max-width:359px){.pc-gallery-top{grid-template-columns:minmax(0,1fr) 73px;gap:6px}.pc-photo{min-height:222px}.pc-photo-label{max-width:calc(100% - 14px);font-size:7px;left:7px;top:8px;padding:5px}.pc-rail-card span{font-size:8px}.pc-rail-card svg{width:24px;height:24px}.pc-purchase h1{font-size:26px}.pc-add{gap:8px;padding:14px 12px}.pc-add-prices{gap:5px}.pc-add-prices s{font-size:9px}}
+  @media(max-width:760px){.pc-wrap{padding:0 5% 40px}.pc-breadcrumb{font-size:10px;padding:15px 0 17px;gap:6px}.pc-breadcrumb>span:last-child{display:none}.pc-breadcrumb>span:nth-last-child(2){display:none}.pc-layout{gap:19px}.pc-gallery-top{grid-template-columns:minmax(0,1fr) 86px;gap:8px}.pc-photo{border-radius:16px;min-height:245px;aspect-ratio:1}.pc-photo-label{font-size:10px;left:10px;top:10px;padding:6px 8px}.pc-photo-index{font-size:10px;right:10px;bottom:10px}.pc-benefit-rail{gap:7px}.pc-rail-card{padding:9px 4px;gap:7px;border-radius:12px}.pc-rail-card svg{width:28px;height:28px}.pc-rail-card span{font-size:10px;line-height:1.35}.pc-thumbnails{gap:7px;padding-top:10px}.pc-thumbnail{flex-basis:54px;width:54px;height:54px;border-radius:9px}.pc-gallery-note{display:none}.pc-intro-line{margin-bottom:10px;gap:8px}.pc-eyebrow{font-size:10px}.pc-shipping-tag{font-size:10px;padding:5px 7px}.pc-shipping-tag svg{width:14px;height:14px}.pc-purchase h1{font-size:29px;line-height:1.08;margin-bottom:10px}.pc-subtitle{font-size:12px;line-height:1.65}.pc-price-row{margin:15px 0}.pc-price-row>strong{font-size:23px}.pc-feature-grid{margin-bottom:17px;padding-bottom:17px;gap:10px}.pc-feature-grid>div{font-size:10px;gap:6px}.pc-feature-icon{width:27px;height:27px}.pc-feature-icon svg{width:16px;height:16px}.pc-option{font-size:10px;padding:10px;min-height:42px}.pc-colour-values .pc-option{flex-basis:calc(50% - 8px)}.pc-option-group+.pc-option-group{margin-top:15px}.pc-quantity-line{margin-top:17px;gap:10px}.pc-dispatch{padding:10px 11px}.pc-dispatch p{font-size:11px}.pc-fit-note{font-size:10px}.pc-add{min-height:56px;padding:15px 16px;font-size:12px;border-radius:12px}.pc-assurance{font-size:10px;padding:15px 0 20px}.pc-trustpilot{padding:11px 12px;gap:8px;font-size:10px}.pc-trustpilot-brand strong{font-size:11px}.pc-trustpilot-brand>span{width:19px;height:19px;font-size:13px}.pc-trustpilot>svg{width:14px;height:14px}.pc-everyday{margin-top:40px;padding:25px 21px;border-radius:16px;gap:25px}.pc-everyday h2{font-size:31px}.pc-everyday-steps{grid-template-columns:1fr;gap:17px}.pc-everyday-steps>div{position:relative;padding-left:30px}.pc-everyday-steps>div>span{position:absolute;left:0;top:3px;margin:0}.pc-everyday-steps strong{margin-bottom:4px}}
+  @media(max-width:359px){.pc-gallery-top{grid-template-columns:minmax(0,1fr) 73px;gap:6px}.pc-photo{min-height:222px}.pc-photo-label{max-width:calc(100% - 14px);font-size:10px;left:7px;top:8px;padding:5px}.pc-rail-card span{font-size:10px}.pc-rail-card svg{width:24px;height:24px}.pc-purchase h1{font-size:26px}.pc-add{gap:8px;padding:14px 12px}.pc-add-prices{gap:5px}.pc-add-prices s{font-size:10px}}
   @media(prefers-reduced-motion:reduce){.pc-product *{transition:none!important}.pc-add:hover:not(:disabled),.pc-add:hover:not(:disabled)>svg{transform:none}}
 </style>
 
@@ -253,6 +248,8 @@
         if (!selected) return;
         let optionValues = [...selected.options];
         let busy = false;
+        let updateDispatch = () => {};
+        const isPurchasable = variant => Boolean(variant && variant.available && (variant.max === null || variant.max >= variant.min));
         root.dataset.pcInitialized = 'true';
         const mainImage = root.querySelector('.pc-main-image');
         if (mainImage) mainImage.dataset.pcImageId = config.initialImageId;
@@ -297,33 +294,35 @@
             group.querySelector('[data-pc-option-value]').textContent = displayOption(optionValues[index]);
             group.querySelectorAll('[data-pc-option]').forEach(button => {
               const active = button.dataset.pcOption === optionValues[index];
-              const possible = config.variants.some(v => v.available && v.options.every((value, i) => value === (i === index ? button.dataset.pcOption : optionValues[i])));
+              const possible = config.variants.some(v => isPurchasable(v) && v.options.every((value, i) => value === (i === index ? button.dataset.pcOption : optionValues[i])));
               button.classList.toggle('is-active', active);
               button.classList.toggle('is-unavailable', !possible);
               button.setAttribute('aria-pressed', String(active));
-              button.title = possible ? button.dataset.pcOption : button.dataset.pcOption + ' — unavailable for this combination';
+              button.title = possible ? displayOption(button.dataset.pcOption) : displayOption(button.dataset.pcOption) + ' — unavailable for this combination';
               button.setAttribute('aria-label', possible ? displayOption(button.dataset.pcOption) : displayOption(button.dataset.pcOption) + ' — unavailable for this combination');
             });
           });
-          const available = Boolean(selected && selected.available && (selected.max === null || selected.max >= selected.min));
+          const available = isPurchasable(selected);
           addButton.disabled = busy || !available;
           root.querySelector('[data-pc-add-label]').textContent = busy ? 'Adding…' : available ? 'Add to cart' : selected ? 'Sold out' : 'Unavailable combination';
           const stock = root.querySelector('[data-pc-stock]');
           stock.classList.toggle('is-unavailable', !available);
           const stockDot = document.createElement('span'); stockDot.setAttribute('aria-hidden', 'true');
-          stock.replaceChildren(stockDot, document.createTextNode(available ? 'In stock' : selected ? 'Sold out' : 'Not available'));
+          stock.replaceChildren(stockDot, document.createTextNode(available ? selected.inStock ? 'In stock' : 'Available to order' : selected ? 'Sold out' : 'Not available'));
           root.querySelector('[data-pc-price]').textContent = selected ? selected.price : 'Unavailable';
           root.querySelector('[data-pc-add-price]').textContent = selected ? selected.price : '';
           root.querySelectorAll('[data-pc-compare], [data-pc-add-compare]').forEach(node => { node.hidden = !selected || !selected.compare; node.textContent = selected && selected.compare ? selected.compare : ''; });
           const saving = root.querySelector('[data-pc-saving]'); saving.hidden = !selected || !selected.saving; saving.textContent = selected ? 'Save ' + selected.saving + '%' : '';
           if (selected) {
             quantity.min = selected.min; quantity.step = selected.step;
-            if (selected.max !== null) quantity.max = selected.max; else quantity.removeAttribute('max');
+            if (selected.max !== null && selected.max >= selected.min) quantity.max = selected.max; else quantity.removeAttribute('max');
             normaliseQuantity();
             if (selected.id !== previousId) showImage(selected.imageId || config.fallbackImageId);
           }
+          quantity.disabled = !available;
           root.querySelector('[data-pc-minus]').disabled = busy || !available || Number(quantity.value) <= Number(quantity.min);
           root.querySelector('[data-pc-plus]').disabled = busy || !available || (quantity.hasAttribute('max') && Number(quantity.value) + Number(quantity.step) > Number(quantity.max));
+          updateDispatch();
           if (updateUrl) {
             try { const url = new URL(window.location.href); if (selected) url.searchParams.set('variant', selected.id); else url.searchParams.delete('variant'); window.history.replaceState(window.history.state, '', url); } catch (_) { /* Native form still works without history access. */ }
           }
@@ -332,56 +331,70 @@
         const dispatch = root.querySelector('[data-pc-dispatch]');
         if (dispatch) {
           const cutoffHour = Number(dispatch.dataset.cutoffHour);
-          const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Copenhagen', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
-          const partsFor = date => Object.fromEntries(formatter.formatToParts(date).map(part => [part.type, part.value]));
-          const localTimeToUtc = (year, month, day, hour) => {
-            const wanted = Date.UTC(year, month - 1, day, hour, 0, 0);
-            let guess = wanted;
-            for (let pass = 0; pass < 3; pass += 1) {
-              const actual = partsFor(new Date(guess));
-              const actualAsUtc = Date.UTC(Number(actual.year), Number(actual.month) - 1, Number(actual.day), Number(actual.hour), Number(actual.minute), Number(actual.second));
-              guess += wanted - actualAsUtc;
-            }
-            return guess;
+          let dispatchInterval = null;
+          const stopDispatch = () => {
+            if (dispatchInterval !== null) window.clearInterval(dispatchInterval);
+            dispatchInterval = null;
           };
-          const updateDispatch = () => {
-            if (!Number.isFinite(cutoffHour)) return;
-            const now = new Date();
-            const parts = partsFor(now);
-            const isWorkingDay = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].includes(parts.weekday);
-            const secondsNow = Number(parts.hour) * 3600 + Number(parts.minute) * 60 + Number(parts.second);
-            const dispatchesToday = isWorkingDay && cutoffHour * 3600 > secondsNow;
-            let remaining;
-            if (dispatchesToday) {
-              remaining = cutoffHour * 3600 - secondsNow;
-            } else {
-              const daysUntilNextWorkingDay = { Mon: 1, Tue: 1, Wed: 1, Thu: 1, Fri: 3, Sat: 2, Sun: 1 }[parts.weekday];
-              const targetDate = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day) + daysUntilNextWorkingDay));
-              const target = localTimeToUtc(targetDate.getUTCFullYear(), targetDate.getUTCMonth() + 1, targetDate.getUTCDate(), cutoffHour);
-              remaining = Math.max(0, Math.floor((target - now.getTime()) / 1000));
-            }
-            const timer = dispatch.querySelector('[data-pc-dispatch-time]');
-            const lead = dispatch.querySelector('[data-pc-dispatch-lead]');
-            const resultText = dispatch.querySelector('[data-pc-dispatch-result]');
-            const hours = Math.floor(remaining / 3600);
-            const minutes = Math.floor((remaining % 3600) / 60);
-            const seconds = remaining % 60;
-            lead.textContent = 'Order within';
-            timer.textContent = [hours, minutes, seconds].map(value => String(value).padStart(2, '0')).join(':');
-            timer.hidden = false;
-            if (dispatchesToday) {
-              resultText.textContent = "and we'll dispatch it today.";
-              dispatch.classList.remove('is-next');
-            } else {
-              resultText.textContent = "and we'll dispatch it the next working day.";
-              dispatch.classList.add('is-next');
-            }
-            dispatch.hidden = false;
-          };
+          const hideDispatch = () => { dispatch.hidden = true; stopDispatch(); };
+          root.pcDispatchCleanup = hideDispatch;
           try {
-            updateDispatch();
-            const dispatchInterval = window.setInterval(() => { if (!root.isConnected) window.clearInterval(dispatchInterval); else updateDispatch(); }, 1000);
-          } catch (_) { dispatch.hidden = true; }
+            const formatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Copenhagen', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+            const targetFormatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Copenhagen', weekday: 'long', day: 'numeric', month: 'long' });
+            const partsFor = date => Object.fromEntries(formatter.formatToParts(date).map(part => [part.type, part.value]));
+            const blockedDates = new Set();
+            let validDates = true;
+            String(config.dispatchBlockedDates || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean).forEach(date => {
+              const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+              if (!match) { validDates = false; return; }
+              const calendarDate = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+              if (calendarDate.toISOString().slice(0, 10) !== date) { validDates = false; return; }
+              blockedDates.add(date);
+            });
+            const localTimeToUtc = calendarDate => {
+              const wanted = Date.UTC(calendarDate.getUTCFullYear(), calendarDate.getUTCMonth(), calendarDate.getUTCDate(), cutoffHour);
+              let guess = wanted;
+              for (let pass = 0; pass < 3; pass += 1) {
+                const actual = partsFor(new Date(guess));
+                const actualAsUtc = Date.UTC(Number(actual.year), Number(actual.month) - 1, Number(actual.day), Number(actual.hour), Number(actual.minute), Number(actual.second));
+                guess += wanted - actualAsUtc;
+              }
+              return guess;
+            };
+            const renderDispatch = () => {
+              if (!root.isConnected || !isPurchasable(selected) || !selected.inStock || !validDates || !Number.isInteger(cutoffHour) || cutoffHour < 8 || cutoffHour > 20) { hideDispatch(); return; }
+              try {
+                const now = new Date();
+                const parts = partsFor(now);
+                const today = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day));
+                let target = null;
+                let dispatchesToday = false;
+                for (let offset = 0; offset <= blockedDates.size * 2 + 7; offset += 1) {
+                  const calendarDate = new Date(today + offset * 86400000);
+                  const weekday = calendarDate.getUTCDay();
+                  if (weekday === 0 || weekday === 6 || blockedDates.has(calendarDate.toISOString().slice(0, 10))) continue;
+                  const candidate = localTimeToUtc(calendarDate);
+                  if (candidate <= now.getTime()) continue;
+                  target = candidate;
+                  dispatchesToday = offset === 0;
+                  break;
+                }
+                if (target === null) { hideDispatch(); return; }
+                const remaining = Math.max(0, Math.ceil((target - now.getTime()) / 1000));
+                const timer = dispatch.querySelector('[data-pc-dispatch-time]');
+                dispatch.querySelector('[data-pc-dispatch-lead]').textContent = 'Order within';
+                timer.textContent = [Math.floor(remaining / 3600), Math.floor((remaining % 3600) / 60), remaining % 60].map(value => String(value).padStart(2, '0')).join(':');
+                timer.hidden = false;
+                dispatch.querySelector('[data-pc-dispatch-result]').textContent = dispatchesToday ? "and we'll dispatch it today." : "and we'll dispatch it on " + targetFormatter.format(new Date(target)) + '.';
+                dispatch.classList.toggle('is-next', !dispatchesToday);
+                dispatch.hidden = false;
+              } catch (_) { hideDispatch(); }
+            };
+            updateDispatch = () => {
+              renderDispatch();
+              if (!dispatch.hidden && dispatchInterval === null) dispatchInterval = window.setInterval(renderDispatch, 1000);
+            };
+          } catch (_) { hideDispatch(); }
         }
         groups.forEach(group => group.addEventListener('click', event => { const button = event.target.closest('[data-pc-option]'); if (!button || busy) return; optionValues[Number(group.dataset.pcOptionIndex)] = button.dataset.pcOption; clearMessage(); sync(true); }));
         variantSelect.addEventListener('change', () => { const variant = config.variants.find(v => v.id === variantSelect.value); if (!variant) return; optionValues = [...variant.options]; clearMessage(); sync(true); });
@@ -391,7 +404,7 @@
         quantity.addEventListener('change', () => { normaliseQuantity(); sync(); });
         form.addEventListener('submit', async event => {
           event.preventDefault();
-          if (busy || !selected || !selected.available) return;
+          if (busy || !isPurchasable(selected)) return;
           normaliseQuantity(); if (!form.reportValidity()) return;
           busy = true; clearMessage(); sync(); form.setAttribute('aria-busy', 'true');
           try {
@@ -409,6 +422,7 @@
         root.querySelector('.pc-enhanced-options')?.removeAttribute('hidden'); root.classList.add('pc-enhanced');
       };
       document.addEventListener('shopify:section:load', event => event.target.querySelectorAll('[data-pc-product]').forEach(window.PodCoverProductInit));
+      document.addEventListener('shopify:section:unload', event => event.target.querySelectorAll('[data-pc-product]').forEach(root => root.pcDispatchCleanup?.()));
     }
     document.querySelectorAll('[data-pc-product]').forEach(window.PodCoverProductInit);
   })();
@@ -425,7 +439,8 @@
     { "type": "checkbox", "id": "show_reviews", "label": "Show genuine product ratings when available", "default": true, "info": "Uses Shopify review metafields. No rating appears without review data." },
     { "type": "header", "content": "Same-day dispatch" },
     { "type": "checkbox", "id": "show_dispatch_countdown", "label": "Show dispatch countdown", "default": true },
-    { "type": "range", "id": "dispatch_cutoff_hour", "label": "Weekday cutoff (Copenhagen time)", "min": 8, "max": 20, "step": 1, "unit": "h", "default": 15, "info": "Before this hour Monday–Friday, the page promises dispatch today. Afterward it says next working day." },
+    { "type": "range", "id": "dispatch_cutoff_hour", "label": "Weekday cutoff (Copenhagen time)", "min": 8, "max": 20, "step": 1, "unit": "h", "default": 15, "info": "Shown for in-stock options only. Orders before this hour Monday–Friday are promised dispatch today." },
+    { "type": "textarea", "id": "dispatch_blocked_dates", "label": "Dates with no dispatch", "info": "Add holidays or closures, one YYYY-MM-DD date per line (for example 2026-12-25). Invalid dates hide the countdown." },
     { "type": "header", "content": "Trustpilot" },
     { "type": "checkbox", "id": "show_trustpilot", "label": "Show Trustpilot bar", "default": true },
     { "type": "url", "id": "trustpilot_url", "label": "Trustpilot profile link", "info": "The bar remains hidden until this is added." },

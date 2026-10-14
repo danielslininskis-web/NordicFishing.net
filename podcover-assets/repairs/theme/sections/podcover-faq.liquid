@@ -1,0 +1,64 @@
+{% liquid
+  assign contact_url = pages['podcover-contact'].url | default: '/pages/podcover-contact'
+  assign refund_url = pages['refund-policy'].url | default: '/pages/refund-policy'
+  assign shipping_url = pages['podcover-shipping'].url | default: '/pages/podcover-shipping'
+%}
+
+<section class="pc-faq" aria-labelledby="pc-faq-title-{{ section.id }}">
+  <header class="pc-faq-hero"><div><span class="pc-faq-eyebrow">PODCOVER / HELP</span><h1 id="pc-faq-title-{{ section.id }}">Questions,<br><em>answered.</em></h1><p>Everything you need to know before choosing your case.</p></div></header>
+  <div class="pc-faq-content">
+    <aside class="pc-faq-aside"><span class="pc-faq-eyebrow">THE DETAILS</span><h2>Good to know.</h2><p>Still need a hand? Tell us your model or send us your order number.</p><a href="{{ contact_url }}">Contact PodCover <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg></a></aside>
+    <div class="pc-faq-list">
+      <details><summary>What is the difference between the two edits?<span aria-hidden="true">+</span></summary><div><p>Blue Cloud has a glossy blue, cloudlike finish and a silver ball chain. The Colour Edit has a matte finish and a black carabiner, in Black, White, Matcha Green, and Lavender.</p></div></details>
+      <details><summary>Which AirPods models does Blue Cloud fit?<span aria-hidden="true">+</span></summary><div><p>Blue Cloud has model options for AirPods Pro 2, AirPods Pro 3, and AirPods 4. Select the option that matches your charging case. Check the product page for current availability.</p></div></details>
+      <details><summary>Which colours and models does the Colour Edit come in?<span aria-hidden="true">+</span></summary><div><p>For AirPods Pro 2, choose Black, White, Matcha Green, or Lavender. For AirPods Pro 3, choose Black or White. Matcha Green and Lavender are not offered for Pro 3. The Colour Edit is not currently offered for AirPods 4.</p><p>Colours and models are separate options on the product page; availability is shown for the combination you select.</p></div></details>
+      <details><summary>How do I choose the right model?<span aria-hidden="true">+</span></summary><div><p>On your iPhone or iPad, connect your AirPods and go to Settings → Bluetooth → the information button beside your AirPods. You can also check the model number printed on the AirPods.</p><p>Match that model to the product option before ordering. Different charging-case sizes are not interchangeable. If you are unsure, <a href="{{ contact_url }}">ask us</a> first.</p></div></details>
+      <details><summary>Are the AirPods included?<span aria-hidden="true">+</span></summary><div><p>No. PodCover sells the protective outer case and the accessory described on the product page. AirPods, the charging case, chargers, and other props in photographs are not included.</p></div></details>
+      <details><summary>How much is shipping?<span aria-hidden="true">+</span></summary><div><p>Standard shipping is free to destinations offered at checkout. Any optional upgraded delivery method is priced before you pay. Read our <a href="{{ shipping_url }}">shipping information</a> for the details.</p></div></details>
+      <details><summary>When will my order be dispatched?<span aria-hidden="true">+</span></summary><div><p>Where same-day dispatch is offered on the product page, it applies only to available items ordered before the displayed cutoff, normally 15:00 Copenhagen time, Monday–Friday. Orders after the cutoff are dispatched on the next working day. The dispatch date shown on the product page accounts for weekends and scheduled closures.</p><p>Dispatch means sending your parcel with the carrier. It does not mean delivery on the same day. Sold-out items cannot be ordered.</p></div></details>
+      <details><summary>When will my order arrive?<span aria-hidden="true">+</span></summary><div><p>Delivery depends on your destination and the carrier service. Any estimate shown at checkout or in your dispatch confirmation is an estimate, unless a fixed delivery date is expressly agreed. We do not promise a delivery time that has not been confirmed.</p></div></details>
+      <details><summary>Can I return my order?<span aria-hidden="true">+</span></summary><div><p>For standard online orders in Denmark and the EU, tell us within 14 days of receiving your order if you wish to cancel, then send it back within the next 14 days. Customers pay change-of-mind return postage.</p><p>You may open ordinary packaging to inspect the case. Clearly personalised products can be excluded from change-of-mind returns; selecting a standard colour or model does not make a case personalised. Read the <a href="{{ refund_url }}">return and refund policy</a> for the full conditions.</p></div></details>
+      <details><summary>What if I receive a faulty or incorrect case?<span aria-hidden="true">+</span></summary><div><p>Email <a href="mailto:podcoverhelp@gmail.com">podcoverhelp@gmail.com</a> or use our <a href="{{ contact_url }}">contact form</a>. Include your order number and describe the issue; photographs can help. We will explain the solution and any return arrangements. Your statutory rights for faulty or incorrect goods remain intact.</p></div></details>
+      <details><summary>The case I want is out of stock. Can I order it?<span aria-hidden="true">+</span></summary><div><p>Unavailable combinations are marked Out of stock and cannot be added to your bag. We do not have a confirmed restock date unless one is stated on the website. You can contact us about a specific model and colour.</p></div></details>
+    </div>
+  </div>
+  <div class="pc-faq-closing"><div><span class="pc-faq-eyebrow">YOUR EVERYDAY. YOUR EDIT.</span><h2>Find the case<br>that feels like <em>you.</em></h2></div><a href="{{ routes.all_products_collection_url }}">Explore the cases <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg></a></div>
+</section>
+
+<style>
+.pc-faq{background:#fff;color:#182c3a}
+.pc-faq *,.pc-faq *::before,.pc-faq *::after{box-sizing:border-box}
+.pc-faq a{color:inherit;text-underline-offset:4px}
+.pc-faq h1,.pc-faq h2{margin:0;font-family:Manrope,Arial,sans-serif;font-weight:500;letter-spacing:-.055em;line-height:1.05}
+.pc-faq h1{font-size:clamp(56px,7vw,100px)}
+.pc-faq h1 em,.pc-faq h2 em{font-family:Georgia,'Times New Roman',serif;color:#397599;font-weight:400}
+.pc-faq p{color:#526575;font-size:15px;line-height:1.85}
+.pc-faq-eyebrow{display:block;margin-bottom:24px;font-size:11px;font-weight:700;letter-spacing:.16em;line-height:1.6}
+.pc-faq-hero{background:#f1f4f8;padding:80px 6%}
+.pc-faq-hero>div{max-width:1350px;margin:auto}
+.pc-faq-hero p{max-width:410px;margin:28px 0 0;font-size:16px}
+.pc-faq-content{display:grid;grid-template-columns:.65fr 1.35fr;gap:10%;max-width:1350px;margin:auto;padding:90px 6% 100px}
+.pc-faq-aside{align-self:start;position:sticky;top:120px}
+.pc-faq-aside h2{font-size:clamp(32px,3vw,46px)}
+.pc-faq-aside p{max-width:320px}
+.pc-faq-aside>a{display:inline-flex;align-items:center;gap:35px;min-height:44px;margin-top:15px;font-size:13px;font-weight:700;text-decoration:none;border-bottom:1px solid #182c3a}
+.pc-faq-list{min-width:0;border-top:1px solid #cbd5dc}
+.pc-faq-list details{border-bottom:1px solid #cbd5dc}
+.pc-faq-list summary{display:flex;align-items:center;justify-content:space-between;gap:25px;padding:24px 0;list-style:none;font-size:15px;font-weight:600;line-height:1.65;cursor:pointer}
+.pc-faq-list summary::-webkit-details-marker{display:none}
+.pc-faq-list summary>span{flex:0 0 20px;color:#397599;font-size:23px;text-align:center;transition:transform .2s}
+.pc-faq-list details[open] summary>span{transform:rotate(45deg)}
+.pc-faq-list details>div{padding:0 35px 25px 0}
+.pc-faq-list details p{margin:0}
+.pc-faq-list details p+p{margin-top:16px}
+.pc-faq-closing{display:flex;align-items:center;justify-content:space-between;gap:45px;background:#f1f4f8;max-width:1190px;margin:0 auto 85px;padding:50px 5%}
+.pc-faq-closing h2{font-size:clamp(34px,4vw,56px)}
+.pc-faq-closing>a{display:inline-flex;align-items:center;justify-content:space-between;gap:40px;min-height:48px;padding:17px 24px;background:#182c3a;color:#fff;text-decoration:none;font-size:13px;font-weight:700}
+.pc-faq a:focus-visible,.pc-faq summary:focus-visible{outline:2px solid #397599;outline-offset:5px}
+@media(max-width:760px){.pc-faq-hero{padding:65px 6%}.pc-faq h1{font-size:clamp(48px,13vw,72px)}.pc-faq-content{grid-template-columns:1fr;gap:45px;padding:65px 6%}.pc-faq-aside{position:static}.pc-faq-list summary{font-size:14px;gap:15px;padding:22px 0}.pc-faq-list details>div{padding-right:5px}.pc-faq-closing{align-items:flex-start;flex-direction:column;margin:0 6% 65px;padding:35px 8%}.pc-faq-closing>a{width:100%;gap:20px}}
+@media(prefers-reduced-motion:reduce){.pc-faq-list summary>span{transition:none}}
+</style>
+
+{% schema %}
+{"name":"PodCover FAQ","settings":[]}
+{% endschema %}

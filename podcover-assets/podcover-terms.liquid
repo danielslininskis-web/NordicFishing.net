@@ -1,10 +1,10 @@
 {% liquid
-  assign contact_url = pages['contact'].url | default: '/pages/contact'
+  assign contact_url = pages['podcover-contact'].url | default: '/pages/podcover-contact'
   assign refund_url = pages['refund-policy'].url | default: '/pages/refund-policy'
-  assign shipping_url = pages['shipping'].url | default: '/pages/shipping'
+  assign shipping_url = pages['podcover-shipping'].url | default: '/pages/podcover-shipping'
   assign privacy_url = shop.privacy_policy.url | default: '/policies/privacy-policy'
   assign business_name = section.settings.business_name | default: shop.name
-  assign legal_email = section.settings.legal_email | default: 'podcoverhelp@gmail.com'
+  assign legal_email = 'podcoverhelp@gmail.com'
 %}
 
 <section class="pt-terms">
@@ -16,7 +16,7 @@
       </div>
       <div class="pt-hero-copy">
         <p>What you agree to when you browse, order, and shop with PodCover.</p>
-        <span>Last updated {{ section.settings.effective_date }}</span>
+        {% if section.settings.effective_date != blank %}<span>Last updated {{ section.settings.effective_date | escape }}</span>{% endif %}
       </div>
     </div>
   </header>
@@ -90,7 +90,8 @@
       <section id="pt-delivery" aria-labelledby="pt-delivery-title">
         <span>06</span>
         <h2 id="pt-delivery-title">Delivery</h2>
-        <p>Available destinations, delivery methods, expected timeframes, and costs are shown at checkout or on our <a href="{{ shipping_url }}">shipping page</a>.</p>
+        <p>Standard shipping is free to destinations offered at checkout. Any optional upgraded delivery charge is shown before you pay. Available destinations, delivery methods, and any delivery estimates are shown at checkout or on our <a href="{{ shipping_url }}">shipping page</a>.</p>
+        <p>Same-day dispatch applies only to available items ordered before the cutoff displayed on the product page, normally 15:00 Copenhagen time Monday–Friday. The dispatch date shown on the product page accounts for weekends and scheduled closures. Dispatch means handing the parcel to the carrier; it is not a promise of same-day delivery.</p>
         <p>Please provide a complete and accurate delivery address. Contact us promptly if you notice an error. We cannot guarantee that an address can be changed after fulfilment begins.</p>
         <p>Delivery estimates are estimates unless we expressly agree to a fixed deadline. Your statutory rights for delayed or missing delivery remain unaffected.</p>
       </section>
@@ -140,7 +141,7 @@
       <h2>Ask before you order.</h2>
       <p>Tell us your AirPods model or send us your question.</p>
     </div>
-    <a href="{{ contact_url }}">Contact PodCover <span aria-hidden="true">↗</span></a>
+    <a href="{{ contact_url }}">Contact PodCover <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
   </div>
 </section>
 
@@ -150,7 +151,7 @@
 .pt-terms a{color:inherit;text-decoration:none}
 .pt-terms h1,.pt-terms h2{margin:0;font-family:Manrope,Arial,sans-serif;font-weight:500;letter-spacing:-.055em;line-height:1.04}
 .pt-terms p{color:var(--pt-muted);font-size:15px;line-height:1.85}
-.pt-terms .pt-kicker{display:block;font-size:10px;font-weight:700;letter-spacing:.18em;line-height:1.6}
+.pt-terms .pt-kicker{display:block;font-size:11px;font-weight:700;letter-spacing:.18em;line-height:1.6}
 .pt-hero{background:#f5f3ef;border-bottom:1px solid var(--pt-line)}
 .pt-hero-inner{display:grid;grid-template-columns:1.15fr .85fr;align-items:end;gap:10%;max-width:1440px;margin:auto;padding:95px 6% 90px}
 .pt-hero .pt-kicker{margin-bottom:30px}
@@ -162,7 +163,7 @@
 .pt-summary{display:grid;grid-template-columns:repeat(3,1fr);max-width:1440px;margin:auto;padding:0 6%;border-bottom:1px solid var(--pt-line)}
 .pt-summary>div{padding:34px 6%;border-left:1px solid var(--pt-line)}
 .pt-summary>div:last-child{border-right:1px solid var(--pt-line)}
-.pt-summary span{display:block;margin-bottom:24px;font-size:9px;letter-spacing:.15em;color:var(--pt-muted)}
+.pt-summary span{display:block;margin-bottom:24px;font-size:11px;letter-spacing:.15em;color:var(--pt-muted)}
 .pt-summary strong{display:block;font-family:Manrope,Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:500;letter-spacing:-.035em}
 .pt-summary p{margin:8px 0 0;font-size:12px;line-height:1.6}
 .pt-layout{display:grid;grid-template-columns:minmax(210px,.55fr) minmax(0,1.45fr);gap:10%;max-width:1180px;margin:auto;padding:100px 6% 110px}
@@ -172,14 +173,14 @@
 .pt-nav a:hover{padding-left:5px;color:var(--pt-ink)}
 .pt-copy>section{position:relative;scroll-margin-top:120px;padding-left:70px}
 .pt-copy>section+section{margin-top:58px;padding-top:48px;border-top:1px solid var(--pt-line)}
-.pt-copy>section>span{position:absolute;top:8px;left:0;font-size:10px;letter-spacing:.12em;color:#397599}
+.pt-copy>section>span{position:absolute;top:8px;left:0;font-size:11px;letter-spacing:.12em;color:#397599}
 .pt-copy h2{font-size:clamp(27px,3vw,40px)}
 .pt-copy p{max-width:680px;margin:20px 0 0}
 .pt-copy p a{text-decoration:underline;text-underline-offset:4px;color:var(--pt-ink)}
 .pt-business-card{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:26px;background:var(--pt-line);border:1px solid var(--pt-line)}
 .pt-business-card>div{display:flex;flex-direction:column;gap:9px;padding:22px;background:#f7f9fa}
-.pt-business-card small{font-size:8px;letter-spacing:.15em;color:var(--pt-muted)}
-.pt-business-card strong{font-size:13px;font-weight:500;line-height:1.6}
+.pt-business-card small{font-size:11px;letter-spacing:.15em;color:var(--pt-muted)}
+.pt-business-card strong{font-size:13px;font-weight:500;line-height:1.6;overflow-wrap:anywhere}
 .pt-contact{display:flex;align-items:center;justify-content:space-between;gap:50px;max-width:1270px;margin:0 auto 100px;padding:50px 5%;background:#edf2f4}
 .pt-contact .pt-kicker{margin-bottom:18px}
 .pt-contact h2{font-size:clamp(34px,4.5vw,60px)}
@@ -210,10 +211,9 @@
 {
   "name": "PodCover terms",
   "settings": [
-    { "type": "text", "id": "effective_date", "label": "Last updated date", "default": "11 October 2026" },
+    { "type": "text", "id": "effective_date", "label": "Last updated date", "default": "13 October 2026" },
     { "type": "text", "id": "business_name", "label": "Legal business name" },
-    { "type": "text", "id": "cvr", "label": "CVR number" },
-    { "type": "text", "id": "legal_email", "label": "Contact email", "default": "podcoverhelp@gmail.com" }
+    { "type": "text", "id": "cvr", "label": "CVR number" }
   ]
 }
 {% endschema %}

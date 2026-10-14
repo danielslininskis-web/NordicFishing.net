@@ -1,0 +1,70 @@
+{% liquid
+  assign contact_url = pages['podcover-contact'].url
+  assign shipping_url = pages['podcover-shipping'].url
+  assign returns_url = pages['podcover-returns'].url
+  assign faq_url = pages['podcover-faq'].url
+  assign refund_url = pages['refund-policy'].url
+  assign terms_url = pages['terms'].url
+  assign about_url = pages['about'].url
+  if contact_url == blank
+    assign contact_url = routes.root_url | append: 'pages/podcover-contact'
+  endif
+  if shipping_url == blank
+    assign shipping_url = routes.root_url | append: 'pages/podcover-shipping'
+  endif
+  if returns_url == blank
+    assign returns_url = routes.root_url | append: 'pages/podcover-returns'
+  endif
+  if faq_url == blank
+    assign faq_url = routes.root_url | append: 'pages/podcover-faq'
+  endif
+  if refund_url == blank
+    assign refund_url = routes.root_url | append: 'pages/refund-policy'
+  endif
+  if terms_url == blank
+    assign terms_url = routes.root_url | append: 'pages/terms'
+  endif
+  if about_url == blank
+    assign about_url = routes.root_url | append: 'pages/about'
+  endif
+%}
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <a class="wordmark" href="{{ routes.root_url }}">PodCover</a>
+      <p>Small details. Big energy.<br>Accessories for the everyday.</p>
+    </div>
+    <div>
+      <h3>Explore</h3>
+      <a href="{{ routes.all_products_collection_url }}">Shop all</a>
+      <a href="{{ routes.collections_url }}">Collections</a>
+      <a href="{{ about_url }}">Our story</a>
+    </div>
+    <div>
+      <h3>Need help?</h3>
+      <a href="{{ contact_url }}">Contact</a>
+      <a href="{{ shipping_url }}">Shipping</a>
+      <a href="{{ returns_url }}">Returns</a>
+      <a href="{{ faq_url }}">FAQs</a>
+    </div>
+    <div>
+      <h3>The fine print</h3>
+      <a href="{{ shop.privacy_policy.url }}">Privacy</a>
+      <a href="{{ refund_url }}">Refund policy</a>
+      <a href="{{ terms_url }}">Terms</a>
+      <a href="{{ shop.shipping_policy.url }}">Shipping policy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© {{ 'now' | date: '%Y' }} PodCover.</span>
+    <span>Made to carry your style.</span>
+  </div>
+</footer>
+<style>
+  .site-footer .footer-grid p,.site-footer .footer-bottom{color:#555d64}
+  .site-footer .footer-bottom{font-size:12px;line-height:1.6}
+  .site-footer a:focus-visible{outline:2px solid #294d66;outline-offset:4px}
+</style>
+{% schema %}
+{"name":"Footer","settings":[]}
+{% endschema %}

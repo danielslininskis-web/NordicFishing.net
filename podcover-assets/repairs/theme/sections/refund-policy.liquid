@@ -1,0 +1,155 @@
+{% liquid
+  assign contact_url = pages['podcover-contact'].url | default: '/pages/podcover-contact'
+%}
+
+<section class="pr-policy">
+  <header class="pr-hero">
+    <div class="pr-hero-inner">
+      <div>
+        <span class="pr-kicker">PODCOVER / THE FINE PRINT</span>
+        <h1>Returns,<br><em>made clear.</em></h1>
+      </div>
+      <div class="pr-hero-copy">
+        <p>Changed your mind, or something not quite right? Here is everything you need to know.</p>
+        <a href="{{ contact_url }}">Start a return <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+      </div>
+    </div>
+  </header>
+
+  <div class="pr-facts" aria-label="Return policy summary">
+    <div><span>01</span><strong>14 days</strong><p>Tell us you want to cancel.</p></div>
+    <div><span>02</span><strong>14 more days</strong><p>Send your order back.</p></div>
+    <div><span>03</span><strong>Return postage</strong><p>Paid by the customer.</p></div>
+  </div>
+
+  <div class="pr-layout">
+    <aside class="pr-nav" aria-label="On this page">
+      <span class="pr-kicker">AT A GLANCE</span>
+      <a href="#pr-window">01 / Return window</a>
+      <a href="#pr-condition">02 / Item condition</a>
+      <a href="#pr-postage">03 / Return postage</a>
+      <a href="#pr-personalised">04 / Personalised items</a>
+      <a href="#pr-refunds">05 / Refunds</a>
+      <a href="#pr-problems">06 / Order problems</a>
+    </aside>
+
+    <div class="pr-copy">
+      <section id="pr-window" aria-labelledby="pr-window-title">
+        <span>01</span>
+        <h2 id="pr-window-title">Your return window</h2>
+        <p>For standard online purchases by customers in Denmark and the EU, you have 14 days from the day you receive your order to tell us that you want to cancel.</p>
+        <p>Email <a href="mailto:podcoverhelp@gmail.com">podcoverhelp@gmail.com</a> or use our <a href="{{ contact_url }}">contact page</a> and include your order number and a clear statement that you wish to cancel. We will confirm the return instructions and the address to use. Your cancellation does not depend on waiting for our reply.</p>
+        <p>After telling us that you want to cancel, send the item back within the following 14 days.</p>
+      </section>
+
+      <section id="pr-condition" aria-labelledby="pr-condition-title">
+        <span>02</span>
+        <h2 id="pr-condition-title">Condition of your return</h2>
+        <p>You may open the ordinary packaging and inspect the case as you would in a shop. Opening the packaging does not automatically remove your right to cancel.</p>
+        <p>Please return the case with its included accessories and original packaging where possible. If it has been handled more than necessary to inspect it, we may deduct an amount that reflects any loss in value.</p>
+      </section>
+
+      <section id="pr-postage" aria-labelledby="pr-postage-title">
+        <span>03</span>
+        <h2 id="pr-postage-title">Return postage</h2>
+        <p>You pay the return postage when returning an item because you changed your mind. We recommend using a tracked service and keeping your proof of postage until the return is complete.</p>
+        <p>If an item arrives faulty, damaged, or incorrect, contact us before returning it. We will explain the next steps and cover any return postage that is legally our responsibility.</p>
+      </section>
+
+      <section id="pr-personalised" aria-labelledby="pr-personalised-title">
+        <span>04</span>
+        <h2 id="pr-personalised-title">Personalised items</h2>
+        <p>Products made to your individual specifications or clearly personalised for you are generally excluded from change-of-mind returns.</p>
+        <p>Choosing one of our standard AirPods models or standard colours does not by itself make a case personalised. Your rights for faulty or incorrect items still apply.</p>
+      </section>
+
+      <section id="pr-refunds" aria-labelledby="pr-refunds-title">
+        <span>05</span>
+        <h2 id="pr-refunds-title">How refunds work</h2>
+        <p>For an eligible cancellation, we refund the product price and any standard original delivery charge to your original payment method. Extra charges for an upgraded delivery option are not included.</p>
+        <p>We issue the refund within 14 days of receiving your cancellation notice. We may wait until we receive the returned goods or you provide proof that they were sent back, whichever happens first.</p>
+        <p>Your bank or payment provider may need additional processing time before the refund appears in your account.</p>
+      </section>
+
+      <section id="pr-problems" aria-labelledby="pr-problems-title">
+        <span>06</span>
+        <h2 id="pr-problems-title">Something wrong with your order?</h2>
+        <p>Contact us with your order number, a short description of the problem, and clear photographs where helpful. We will review it and explain the available solution.</p>
+        <p>This change-of-mind policy does not limit any statutory rights you have for faulty, damaged, or incorrectly supplied goods.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="pr-contact">
+    <div>
+      <span class="pr-kicker">NEED A HAND?</span>
+      <h2>Let’s sort it out.</h2>
+      <p>Send us your order number and tell us what happened.</p>
+    </div>
+    <a href="{{ contact_url }}">Contact PodCover <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+  </div>
+</section>
+
+<style>
+.pr-policy{--pr-ink:#182c3a;--pr-muted:#586976;--pr-line:#dce3e7;background:#fff;color:var(--pr-ink)}
+.pr-policy *,.pr-policy *::before,.pr-policy *::after{box-sizing:border-box}
+.pr-policy a{color:inherit;text-decoration:none}
+.pr-policy h1,.pr-policy h2{margin:0;font-family:Manrope,Arial,sans-serif;font-weight:500;letter-spacing:-.055em;line-height:1.04}
+.pr-policy p{color:var(--pr-muted);font-size:15px;line-height:1.85}
+.pr-policy .pr-kicker{display:block;font-size:11px;font-weight:700;letter-spacing:.18em;line-height:1.6}
+.pr-hero{background:#f1f4f8;border-bottom:1px solid var(--pr-line)}
+.pr-hero-inner{display:grid;grid-template-columns:1.15fr .85fr;align-items:end;gap:10%;max-width:1440px;margin:auto;padding:95px 6% 90px}
+.pr-hero .pr-kicker{margin-bottom:30px}
+.pr-hero h1{font-size:clamp(56px,7.2vw,108px);color:#13191f}
+.pr-hero h1 em{font-family:Georgia,'Times New Roman',serif;font-weight:400;color:#397599}
+.pr-hero-copy{padding-bottom:10px}
+.pr-hero-copy p{max-width:440px;margin:0 0 28px;font-size:17px}
+.pr-hero-copy a{display:inline-flex;align-items:center;justify-content:space-between;gap:60px;min-width:210px;border-bottom:1px solid var(--pr-ink);padding:12px 0;font-size:13px;font-weight:700}
+.pr-facts{display:grid;grid-template-columns:repeat(3,1fr);max-width:1440px;margin:auto;padding:0 6%;border-bottom:1px solid var(--pr-line)}
+.pr-facts>div{padding:34px 6%;border-left:1px solid var(--pr-line)}
+.pr-facts>div:last-child{border-right:1px solid var(--pr-line)}
+.pr-facts span{display:block;margin-bottom:24px;font-size:11px;letter-spacing:.15em;color:var(--pr-muted)}
+.pr-facts strong{display:block;font-family:Manrope,Arial,sans-serif;font-size:clamp(20px,2vw,28px);font-weight:500;letter-spacing:-.035em}
+.pr-facts p{margin:8px 0 0;font-size:12px;line-height:1.6}
+.pr-layout{display:grid;grid-template-columns:minmax(210px,.55fr) minmax(0,1.45fr);gap:10%;max-width:1180px;margin:auto;padding:100px 6% 110px}
+.pr-nav{position:sticky;top:130px;align-self:start;display:flex;flex-direction:column}
+.pr-nav .pr-kicker{margin-bottom:24px}
+.pr-nav a{padding:13px 0;border-bottom:1px solid var(--pr-line);font-size:11px;color:var(--pr-muted);transition:color .2s,padding-left .2s}
+.pr-nav a:hover{padding-left:5px;color:var(--pr-ink)}
+.pr-copy>section{position:relative;scroll-margin-top:120px;padding-left:70px}
+.pr-copy>section+section{margin-top:58px;padding-top:48px;border-top:1px solid var(--pr-line)}
+.pr-copy>section>span{position:absolute;top:8px;left:0;font-size:11px;letter-spacing:.12em;color:#397599}
+.pr-copy h2{font-size:clamp(27px,3vw,40px)}
+.pr-copy p{max-width:680px;margin:20px 0 0}
+.pr-copy p a{text-decoration:underline;text-underline-offset:4px;color:var(--pr-ink)}
+.pr-contact{display:flex;align-items:center;justify-content:space-between;gap:50px;max-width:1270px;margin:0 auto 100px;padding:50px 5%;background:#edf2f4}
+.pr-contact .pr-kicker{margin-bottom:18px}
+.pr-contact h2{font-size:clamp(34px,4.5vw,60px)}
+.pr-contact p{margin:16px 0 0}
+.pr-contact>a{display:inline-flex;align-items:center;justify-content:space-between;gap:45px;min-width:220px;padding:18px 22px;background:#161b20;color:#fff;font-size:13px;font-weight:700;transition:transform .2s,background .2s}
+.pr-contact>a:hover{transform:translateY(-2px);background:#30526a}
+.pr-policy a:focus-visible{outline:2px solid #397599;outline-offset:5px}
+@media(max-width:760px){
+ .pr-hero-inner{grid-template-columns:1fr;gap:42px;padding:65px 6%}
+ .pr-hero h1{font-size:clamp(50px,14vw,76px)}
+ .pr-hero-copy p{font-size:15px}
+ .pr-facts{grid-template-columns:1fr;padding:0 6%}
+ .pr-facts>div{padding:25px 0;border-left:0;border-bottom:1px solid var(--pr-line)}
+ .pr-facts>div:last-child{border-right:0;border-bottom:0}
+ .pr-facts span{margin-bottom:12px}
+ .pr-layout{grid-template-columns:1fr;padding:70px 6% 80px}
+ .pr-nav{display:none}
+ .pr-copy>section{padding-left:38px}
+ .pr-copy>section+section{margin-top:42px;padding-top:38px}
+ .pr-contact{align-items:flex-start;flex-direction:column;margin:0 6% 70px;padding:35px 8%}
+ .pr-contact>a{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.pr-nav a,.pr-contact>a{transition:none}}
+</style>
+
+{% schema %}
+{
+  "name": "PodCover refund policy",
+  "settings": []
+}
+{% endschema %}
