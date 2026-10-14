@@ -8,16 +8,16 @@ Your product prices, inventory, homepage image selections and checkout configura
 
 The personal address is still public until these saved Shopify policies are replaced. Theme code cannot remove it from Shopify's policy database.
 
-Open **Settings → Policies**. For each row below, open the policy, switch its editor to HTML/source view, replace the complete body with the matching file, and save. Click a filename here, then **Raw** on GitHub to copy the code. These files contain HTML only, with no Liquid or schema tags.
+Open **Settings → Policies**. For each row below, open the policy in its normal text editor, select all of the old text, paste the matching replacement, and save. Click a filename here, then **Raw** on GitHub to copy the text. These files are plain text: there are no HTML tags, Markdown headings, Liquid tags, or other code.
 
 | Shopify policy | Complete replacement |
 | --- | --- |
-| Privacy policy | [privacy-policy.html](policies/privacy-policy.html) |
-| Legal notice | [legal-notice.html](policies/legal-notice.html) |
-| Return and refund policy | [refund-policy.html](policies/refund-policy.html) |
-| Shipping policy | [shipping-policy.html](policies/shipping-policy.html) |
-| Terms of service | [terms-of-service.html](policies/terms-of-service.html) |
-| Contact information | [contact-information.html](policies/contact-information.html) |
+| Privacy policy | [privacy-policy.txt](policies/privacy-policy.txt) |
+| Legal notice | [legal-notice.txt](policies/legal-notice.txt) |
+| Return and refund policy | [refund-policy.txt](policies/refund-policy.txt) |
+| Shipping policy | [shipping-policy.txt](policies/shipping-policy.txt) |
+| Terms of service | [terms-of-service.txt](policies/terms-of-service.txt) |
+| Contact information | [contact-information.txt](policies/contact-information.txt) |
 
 The privacy replacement keeps the existing policy's main content and replaces its contact information. Check the automated-policy setting so a future regeneration does not restore unwanted details. The replacements use **podcoverhelp@gmail.com** and contain no personal street address. They make returns consistent: 14 days to notify cancellation for Denmark/EU online purchases, then 14 days to send the goods back, with customer-paid change-of-mind return postage. Ordinary opened packaging does not automatically remove statutory cancellation rights.
 

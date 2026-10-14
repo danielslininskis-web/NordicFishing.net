@@ -1,6 +1,6 @@
 These are body-only replacement drafts for Shopify Settings → Policies. They are prepared for review and have not been published to Shopify.
 
-Paste each matching HTML file into the policy editor's HTML view. The privacy replacement preserves the existing automated policy text except for its contact block and the support email. If Shopify automatic policy updates are enabled, review whether a later regeneration could reintroduce the old contact details.
+Paste each matching `.txt` file into the policy editor's normal text view. Do not open HTML/source mode. The privacy replacement preserves the existing automated policy text except for its contact block and the support email. If Shopify automatic policy updates are enabled, review whether a later regeneration could reintroduce the old contact details.
 
 The public drafts contain no personal street address or invented registration number. A legal trading name, business contact/service address, and registration/VAT details may be required for a Danish online business or under privacy law. Supply verified public business details where applicable and review the drafts before publishing. A suitable business/service address can keep a home address out of the website. These drafts do not establish full legal compliance.
 
